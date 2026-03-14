@@ -23,7 +23,7 @@ export interface ModelConfig {
   max_tokens?: number;
 }
 
-export type ModelProvider = "anthropic" | "openai" | "ollama" | "bedrock";
+export type ModelProvider = "anthropic" | "openai" | "google" | "ollama" | "bedrock";
 
 export interface SystemPromptConfig {
   file?: string;

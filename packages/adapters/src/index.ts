@@ -1,5 +1,7 @@
 export { AnthropicAdapter } from "./anthropic.js";
 export type { AnthropicDeployOptions } from "./anthropic.js";
+export { GoogleAdapter } from "./google.js";
+export type { GoogleDeployOptions } from "./google.js";
 export { OpenAIAdapter } from "./openai.js";
 export type { OpenAIDeployOptions } from "./openai.js";
 export { OllamaAdapter } from "./ollama.js";

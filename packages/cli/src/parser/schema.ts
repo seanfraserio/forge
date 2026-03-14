@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const modelProviderSchema = z.enum(["anthropic", "openai", "ollama", "bedrock"]);
+export const modelProviderSchema = z.enum(["anthropic", "openai", "google", "ollama", "bedrock"]);
 
 export const modelConfigSchema = z.object({
   provider: modelProviderSchema,
