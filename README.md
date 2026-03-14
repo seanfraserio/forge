@@ -74,7 +74,7 @@ Forge is a CLI tool — no server required. See [docs/getting-started.md](docs/g
 3. Run `pnpm build && pnpm test && pnpm typecheck` before submitting a PR
 4. Open a pull request against `main`
 
-See [CLAUDE.md](CLAUDE.md) for architecture and conventions.
+See [ARCHITECTURE.md](ARCHITECTURE.md) for architecture and conventions.
 
 ## License
 
