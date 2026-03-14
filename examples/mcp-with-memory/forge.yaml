@@ -1,0 +1,40 @@
+version: "1"
+
+agent:
+  name: research-assistant
+  description: "Research assistant with persistent memory and web search"
+
+model:
+  provider: anthropic
+  name: claude-sonnet-4-5-20251001
+  temperature: 0.5
+  max_tokens: 8192
+
+system_prompt:
+  file: ./prompts/research-system.md
+
+tools:
+  mcp_servers:
+    - name: brave-search
+      command: npx
+      args: ["-y", "@modelcontextprotocol/server-brave-search"]
+      env:
+        BRAVE_API_KEY: "${BRAVE_API_KEY}"
+    - name: filesystem
+      command: npx
+      args: ["-y", "@modelcontextprotocol/server-filesystem", "./workspace"]
+
+memory:
+  type: vector
+  provider: chroma
+  collection: research-memory
+
+environments:
+  dev:
+    model:
+      name: claude-haiku-4-5-20251001
+    memory:
+      type: in-context
+  production:
+    model:
+      temperature: 0.3

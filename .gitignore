@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.forge/
+.env
+.env.*
+*.log
+.DS_Store
+
+# Enterprise packages live in a separate private repo
+packages/enterprise/

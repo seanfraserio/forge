@@ -1,0 +1,22 @@
+export { ForgeClient } from "./client.js";
+export type {
+  ForgeConfig,
+  AgentConfig,
+  ModelConfig,
+  ModelProvider,
+  SystemPromptConfig,
+  ToolsConfig,
+  McpServerConfig,
+  MemoryConfig,
+  MemoryType,
+  MemoryProvider,
+  EnvironmentOverride,
+  HooksConfig,
+  HookStep,
+  AgentState,
+  PlanResult,
+  PlanItem,
+  ApplyOptions,
+  ApplyResult,
+  ForgeClientOptions,
+} from "./types.js";
