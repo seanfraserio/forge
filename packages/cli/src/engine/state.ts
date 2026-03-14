@@ -90,7 +90,12 @@ function redactConfig(config: ForgeConfig): ForgeConfig {
     for (const server of cloned.tools.mcp_servers) {
       if (server.env) {
         for (const key of Object.keys(server.env)) {
-          server.env[key] = "[REDACTED]";
+          const value = server.env[key];
+          // Keep ${VAR} template references as-is for accurate diffing
+          // Only redact values that appear to be resolved secrets
+          if (!value.match(/^\$\{.+\}$/)) {
+            server.env[key] = "[REDACTED]";
+          }
         }
       }
     }

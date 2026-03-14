@@ -1,7 +1,7 @@
 // ─── forge.yaml configuration types ───
 
 export interface ForgeConfig {
-  version: string;
+  version: "1";
   agent: AgentConfig;
   model: ModelConfig;
   system_prompt?: SystemPromptConfig;
@@ -96,6 +96,7 @@ export interface ApplyOptions {
   dryRun: boolean;
   environment: string;
   autoApprove: boolean;
+  stateDir?: string;
 }
 
 export interface ApplyResult {

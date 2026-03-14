@@ -19,12 +19,7 @@ export class AnthropicAdapter {
   }
 
   validateModel(model: ModelConfig): boolean {
-    const validModels = [
-      "claude-sonnet-4-5-20251001",
-      "claude-haiku-4-5-20251001",
-      "claude-opus-4-5-20251001",
-    ];
-    return validModels.some((m) => model.name.startsWith(m) || model.name.includes("claude"));
+    return model.name.startsWith("claude-");
   }
 
   // TODO: Implement full deployment to Anthropic

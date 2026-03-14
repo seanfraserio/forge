@@ -21,7 +21,7 @@ program
   .option("--dry-run", "Show plan without applying changes", false)
   .option("--allow-hooks", "Allow execution of pre_deploy and post_deploy hooks", false)
   .action((opts) => {
-    deployCommand({
+    return deployCommand({
       config: opts.config,
       env: opts.env,
       autoApprove: opts.autoApprove,
@@ -36,7 +36,7 @@ program
   .option("-c, --config <path>", "Path to forge.yaml", "forge.yaml")
   .option("-e, --env <environment>", "Target environment", "dev")
   .action((opts) => {
-    diffCommand({
+    return diffCommand({
       config: opts.config,
       env: opts.env,
     });
@@ -47,7 +47,7 @@ program
   .description("Roll back to a previous deployment state")
   .option("--target <hash>", "Target state hash to roll back to")
   .action((opts) => {
-    rollbackCommand({
+    return rollbackCommand({
       targetHash: opts.target,
     });
   });
@@ -57,7 +57,7 @@ program
   .description("Validate a forge.yaml configuration file")
   .option("-c, --config <path>", "Path to forge.yaml", "forge.yaml")
   .action((opts) => {
-    validateCommand({
+    return validateCommand({
       config: opts.config,
     });
   });

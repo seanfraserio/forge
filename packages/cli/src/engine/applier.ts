@@ -10,7 +10,7 @@ export async function apply(
   config: ForgeConfig,
   opts: ApplyOptions
 ): Promise<ApplyResult> {
-  const stateDir = ".forge";
+  const stateDir = opts.stateDir ?? ".forge";
 
   // If no changes, return immediately
   if (!plan.hasChanges) {
