@@ -18,7 +18,7 @@ export class OpenAIAdapter {
   }
 
   validateModel(model: ModelConfig): boolean {
-    return model.name.startsWith("gpt-") || model.name.startsWith("o");
+    return model.name.startsWith("gpt-") || /^o\d/.test(model.name);
   }
 
   // TODO: Implement full deployment to OpenAI
