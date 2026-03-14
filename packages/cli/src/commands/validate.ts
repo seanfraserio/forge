@@ -21,11 +21,12 @@ export async function validateCommand(opts: ValidateCommandOptions): Promise<voi
   const result = parseForgeYaml(raw);
 
   if (result.success) {
+    const config = result.config!;
     console.log(chalk.green("✓ Configuration is valid."));
-    console.log(chalk.dim(`  Agent: ${result.config!.agent.name}`));
-    console.log(chalk.dim(`  Model: ${result.config!.model.provider}/${result.config!.model.name}`));
-    if (result.config!.environments) {
-      const envs = Object.keys(result.config!.environments);
+    console.log(chalk.dim(`  Agent: ${config.agent.name}`));
+    console.log(chalk.dim(`  Model: ${config.model.provider}/${config.model.name}`));
+    if (config.environments) {
+      const envs = Object.keys(config.environments);
       console.log(chalk.dim(`  Environments: ${envs.join(", ")}`));
     }
   } else {

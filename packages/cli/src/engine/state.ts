@@ -1,7 +1,6 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
-import { existsSync } from "node:fs";
 import { createHash } from "node:crypto";
-import { join, dirname } from "node:path";
+import { join } from "node:path";
 import type { AgentState, ForgeConfig } from "@forge-ai/sdk";
 
 const STATE_FILE = "state.json";
@@ -12,10 +11,10 @@ const STATE_FILE = "state.json";
 function sortDeep(obj: unknown): unknown {
   if (Array.isArray(obj)) return obj.map(sortDeep);
   if (obj !== null && typeof obj === 'object') {
-    return Object.keys(obj as Record<string, unknown>).sort().reduce((acc, key) => {
-      acc[key] = sortDeep((obj as Record<string, unknown>)[key]);
-      return acc;
-    }, {} as Record<string, unknown>);
+    const record = obj as Record<string, unknown>;
+    return Object.fromEntries(
+      Object.keys(record).sort().map(key => [key, sortDeep(record[key])])
+    );
   }
   return obj;
 }
@@ -35,10 +34,6 @@ export function hashConfig(config: ForgeConfig): string {
  */
 export async function readState(stateDir: string): Promise<AgentState | null> {
   const statePath = join(stateDir, STATE_FILE);
-  if (!existsSync(statePath)) {
-    return null;
-  }
-
   try {
     const raw = await readFile(statePath, "utf-8");
     const parsed = JSON.parse(raw);
@@ -48,14 +43,15 @@ export async function readState(stateDir: string): Promise<AgentState | null> {
       typeof parsed.configHash !== "string" ||
       typeof parsed.agentName !== "string"
     ) {
-      console.warn(
-        "Warning: State file is missing required fields (configHash, agentName). Treating as no prior state."
-      );
+      console.warn("Warning: State file has invalid structure. Treating as no prior state.");
       return null;
     }
     return parsed as AgentState;
-  } catch {
-    console.warn("Warning: Failed to parse state file. Treating as no prior state.");
+  } catch (err: unknown) {
+    if (err instanceof Error && "code" in err && (err as NodeJS.ErrnoException).code === "ENOENT") {
+      return null;
+    }
+    console.warn("Warning: Failed to read state file. Treating as no prior state.");
     return null;
   }
 }
@@ -69,11 +65,8 @@ export async function writeState(
   state: AgentState
 ): Promise<void> {
   const statePath = join(stateDir, STATE_FILE);
-  const dir = dirname(statePath);
 
-  if (!existsSync(dir)) {
-    await mkdir(dir, { recursive: true, mode: 0o700 });
-  }
+  await mkdir(stateDir, { recursive: true, mode: 0o700 });
 
   await writeFile(statePath, JSON.stringify(state, null, 2), {
     encoding: "utf-8",
@@ -89,11 +82,10 @@ function redactConfig(config: ForgeConfig): ForgeConfig {
   if (cloned.tools?.mcp_servers) {
     for (const server of cloned.tools.mcp_servers) {
       if (server.env) {
-        for (const key of Object.keys(server.env)) {
-          const value = server.env[key];
+        for (const [key, value] of Object.entries(server.env)) {
           // Keep ${VAR} template references as-is for accurate diffing
           // Only redact values that appear to be resolved secrets
-          if (!value.match(/^\$\{.+\}$/)) {
+          if (!/^\$\{.+\}$/.test(value)) {
             server.env[key] = "[REDACTED]";
           }
         }

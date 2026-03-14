@@ -34,24 +34,7 @@ export async function apply(
     };
   }
 
-  const applied: typeof plan.toCreate = [];
-
-  // Apply creates
-  for (const item of plan.toCreate) {
-    // In a real implementation, this would call provider adapters
-    // to actually provision resources. For now, we track the state.
-    applied.push(item);
-  }
-
-  // Apply updates
-  for (const item of plan.toUpdate) {
-    applied.push(item);
-  }
-
-  // Apply deletes
-  for (const item of plan.toDelete) {
-    applied.push(item);
-  }
+  const applied = [...plan.toCreate, ...plan.toUpdate, ...plan.toDelete];
 
   // Write state file
   const state = createState(config, opts.environment);

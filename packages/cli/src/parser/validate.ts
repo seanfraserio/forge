@@ -40,7 +40,7 @@ export function resolveEnvironment(
   config: ForgeConfig,
   env: string
 ): ForgeConfig {
-  if (!config.environments || !config.environments[env]) {
+  if (!config.environments?.[env]) {
     return config;
   }
 

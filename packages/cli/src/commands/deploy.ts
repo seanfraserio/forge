@@ -1,7 +1,6 @@
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
 import chalk from "chalk";
-import { parseForgeYaml, resolveEnvironment } from "../parser/validate.js";
+import { resolveEnvironment } from "../parser/validate.js";
+import { loadConfig } from "../parser/load.js";
 import { plan, formatPlan } from "../engine/planner.js";
 import { apply } from "../engine/applier.js";
 import { readState } from "../engine/state.js";
@@ -16,29 +15,11 @@ export interface DeployCommandOptions {
 }
 
 export async function deployCommand(opts: DeployCommandOptions): Promise<void> {
-  const configPath = resolve(opts.config);
-
   // 1. Read and parse forge.yaml
-  console.log(chalk.blue("→ Reading configuration from"), configPath);
-  let raw: string;
-  try {
-    raw = await readFile(configPath, "utf-8");
-  } catch {
-    console.error(chalk.red("✗ Could not read config file:"), configPath);
-    process.exit(1);
-  }
-
-  const parsed = parseForgeYaml(raw);
-  if (!parsed.success || !parsed.config) {
-    console.error(chalk.red("✗ Validation errors:"));
-    for (const err of parsed.errors ?? []) {
-      console.error(chalk.red(`  • ${err}`));
-    }
-    process.exit(1);
-  }
+  const baseConfig = await loadConfig(opts.config);
 
   // 2. Resolve environment overrides
-  const config = resolveEnvironment(parsed.config, opts.env);
+  const config = resolveEnvironment(baseConfig, opts.env);
   console.log(
     chalk.blue("→ Agent:"),
     config.agent.name,

@@ -22,10 +22,7 @@ export class GoogleAdapter {
   }
 
   validateModel(model: ModelConfig): boolean {
-    return (
-      model.name.startsWith("gemini-") ||
-      model.name.includes("gemini")
-    );
+    return model.name.startsWith("gemini-");
   }
 
   // TODO: Implement full deployment to Google Gemini / Vertex AI

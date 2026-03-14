@@ -1,7 +1,6 @@
-import { readFile } from "node:fs/promises";
-import { resolve } from "node:path";
 import chalk from "chalk";
-import { parseForgeYaml, resolveEnvironment } from "../parser/validate.js";
+import { resolveEnvironment } from "../parser/validate.js";
+import { loadConfig } from "../parser/load.js";
 import { plan } from "../engine/planner.js";
 import { readState } from "../engine/state.js";
 
@@ -11,26 +10,8 @@ export interface DiffCommandOptions {
 }
 
 export async function diffCommand(opts: DiffCommandOptions): Promise<void> {
-  const configPath = resolve(opts.config);
-
-  let raw: string;
-  try {
-    raw = await readFile(configPath, "utf-8");
-  } catch {
-    console.error(chalk.red("✗ Could not read config file:"), configPath);
-    process.exit(1);
-  }
-
-  const parsed = parseForgeYaml(raw);
-  if (!parsed.success || !parsed.config) {
-    console.error(chalk.red("✗ Validation errors:"));
-    for (const err of parsed.errors ?? []) {
-      console.error(chalk.red(`  • ${err}`));
-    }
-    process.exit(1);
-  }
-
-  const config = resolveEnvironment(parsed.config, opts.env);
+  const baseConfig = await loadConfig(opts.config);
+  const config = resolveEnvironment(baseConfig, opts.env);
   const currentState = await readState(".forge");
   const planResult = plan(config, currentState);
 
