@@ -19,12 +19,14 @@ program
   .option("-e, --env <environment>", "Target environment", "dev")
   .option("--auto-approve", "Skip confirmation prompt", false)
   .option("--dry-run", "Show plan without applying changes", false)
+  .option("--allow-hooks", "Allow execution of pre_deploy and post_deploy hooks", false)
   .action((opts) => {
     deployCommand({
       config: opts.config,
       env: opts.env,
       autoApprove: opts.autoApprove,
       dryRun: opts.dryRun,
+      allowHooks: opts.allowHooks,
     });
   });
 

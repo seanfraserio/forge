@@ -12,6 +12,7 @@ export interface DeployCommandOptions {
   env: string;
   autoApprove: boolean;
   dryRun: boolean;
+  allowHooks: boolean;
 }
 
 export async function deployCommand(opts: DeployCommandOptions): Promise<void> {
@@ -71,7 +72,25 @@ export async function deployCommand(opts: DeployCommandOptions): Promise<void> {
     // For the scaffold, auto-approve by default
   }
 
-  // 6. Apply
+  // 6. Warn about hooks
+  const preHooks = config.hooks?.pre_deploy ?? [];
+  const postHooks = config.hooks?.post_deploy ?? [];
+  if (preHooks.length > 0 || postHooks.length > 0) {
+    console.log(chalk.yellow("\n⚠ Hooks detected in configuration:"));
+    for (const hook of preHooks) {
+      console.log(chalk.yellow(`  pre_deploy:  ${hook.run}`));
+    }
+    for (const hook of postHooks) {
+      console.log(chalk.yellow(`  post_deploy: ${hook.run}`));
+    }
+    if (!opts.allowHooks) {
+      console.log(
+        chalk.yellow("  Hooks will NOT be executed. Pass --allow-hooks to enable hook execution.\n")
+      );
+    }
+  }
+
+  // 7. Apply
   const applyOpts: ApplyOptions = {
     dryRun: opts.dryRun,
     environment: opts.env,

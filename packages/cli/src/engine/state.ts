@@ -7,12 +7,25 @@ import type { AgentState, ForgeConfig } from "@forge-ai/sdk";
 const STATE_FILE = "state.json";
 
 /**
+ * Deep-sort all object keys recursively to ensure deterministic serialization.
+ */
+function sortDeep(obj: unknown): unknown {
+  if (Array.isArray(obj)) return obj.map(sortDeep);
+  if (obj !== null && typeof obj === 'object') {
+    return Object.keys(obj as Record<string, unknown>).sort().reduce((acc, key) => {
+      acc[key] = sortDeep((obj as Record<string, unknown>)[key]);
+      return acc;
+    }, {} as Record<string, unknown>);
+  }
+  return obj;
+}
+
+/**
  * Compute a deterministic SHA-256 hash of a normalized config.
- * Used to detect config drift.
+ * Uses deep recursive key sorting for stable serialization.
  */
 export function hashConfig(config: ForgeConfig): string {
-  // Normalize by sorting keys via JSON.stringify replacer
-  const normalized = JSON.stringify(config, Object.keys(config).sort());
+  const normalized = JSON.stringify(sortDeep(config));
   return createHash("sha256").update(normalized).digest("hex");
 }
 
@@ -28,8 +41,21 @@ export async function readState(stateDir: string): Promise<AgentState | null> {
 
   try {
     const raw = await readFile(statePath, "utf-8");
-    return JSON.parse(raw) as AgentState;
+    const parsed = JSON.parse(raw);
+    if (
+      typeof parsed !== "object" ||
+      parsed === null ||
+      typeof parsed.configHash !== "string" ||
+      typeof parsed.agentName !== "string"
+    ) {
+      console.warn(
+        "Warning: State file is missing required fields (configHash, agentName). Treating as no prior state."
+      );
+      return null;
+    }
+    return parsed as AgentState;
   } catch {
+    console.warn("Warning: Failed to parse state file. Treating as no prior state.");
     return null;
   }
 }
@@ -46,10 +72,30 @@ export async function writeState(
   const dir = dirname(statePath);
 
   if (!existsSync(dir)) {
-    await mkdir(dir, { recursive: true });
+    await mkdir(dir, { recursive: true, mode: 0o700 });
   }
 
-  await writeFile(statePath, JSON.stringify(state, null, 2), "utf-8");
+  await writeFile(statePath, JSON.stringify(state, null, 2), {
+    encoding: "utf-8",
+    mode: 0o600,
+  });
+}
+
+/**
+ * Deep-clone a config and redact sensitive values from MCP server env vars.
+ */
+function redactConfig(config: ForgeConfig): ForgeConfig {
+  const cloned = JSON.parse(JSON.stringify(config)) as ForgeConfig;
+  if (cloned.tools?.mcp_servers) {
+    for (const server of cloned.tools.mcp_servers) {
+      if (server.env) {
+        for (const key of Object.keys(server.env)) {
+          server.env[key] = "[REDACTED]";
+        }
+      }
+    }
+  }
+  return cloned;
 }
 
 /**
@@ -64,6 +110,6 @@ export function createState(
     lastDeployed: new Date().toISOString(),
     environment,
     agentName: config.agent.name,
-    config,
+    config: redactConfig(config),
   };
 }
