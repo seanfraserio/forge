@@ -1,5 +1,5 @@
 {
-  "name": "@forge-ai/sdk",
+  "name": "@openforge-ai/sdk",
   "version": "0.1.0",
   "description": "TypeScript SDK and types for Forge agent infrastructure",
   "type": "module",

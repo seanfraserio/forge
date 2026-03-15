@@ -1,5 +1,5 @@
 {
-  "name": "@forge-ai/cli",
+  "name": "@openforge-ai/cli",
   "version": "0.1.0",
   "description": "Agent infrastructure as code — the Terraform for AI agents",
   "type": "module",
@@ -33,7 +33,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@forge-ai/sdk": "workspace:*",
+    "@openforge-ai/sdk": "workspace:*",
     "chalk": "^5.3.0",
     "commander": "^12.0.0",
     "yaml": "^2.4.0",

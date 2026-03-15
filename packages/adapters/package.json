@@ -1,5 +1,5 @@
 {
-  "name": "@forge-ai/adapters",
+  "name": "@openforge-ai/adapters",
   "version": "0.1.0",
   "description": "LLM provider adapters for Forge agent infrastructure",
   "type": "module",
@@ -30,7 +30,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@forge-ai/sdk": "workspace:*"
+    "@openforge-ai/sdk": "workspace:*"
   },
   "devDependencies": {
     "tsup": "^8.0.0",

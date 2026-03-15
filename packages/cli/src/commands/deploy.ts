@@ -4,7 +4,7 @@ import { loadConfig } from "../parser/load.js";
 import { plan, formatPlan } from "../engine/planner.js";
 import { apply } from "../engine/applier.js";
 import { readState } from "../engine/state.js";
-import type { ApplyOptions } from "@forge-ai/sdk";
+import type { ApplyOptions } from "@openforge-ai/sdk";
 
 export interface DeployCommandOptions {
   config: string;

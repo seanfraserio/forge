@@ -24,22 +24,22 @@ export class ForgeClient {
 
   // TODO: Implement config loading with YAML parsing
   async loadConfig(): Promise<ForgeConfig> {
-    throw new Error("Not implemented — use @forge-ai/cli for full functionality");
+    throw new Error("Not implemented — use @openforge-ai/cli for full functionality");
   }
 
   // TODO: Implement plan generation
   async plan(_config: ForgeConfig): Promise<PlanResult> {
-    throw new Error("Not implemented — use @forge-ai/cli for full functionality");
+    throw new Error("Not implemented — use @openforge-ai/cli for full functionality");
   }
 
   // TODO: Implement apply
   async apply(_plan: PlanResult, _opts?: Partial<ApplyOptions>): Promise<ApplyResult> {
-    throw new Error("Not implemented — use @forge-ai/cli for full functionality");
+    throw new Error("Not implemented — use @openforge-ai/cli for full functionality");
   }
 
   // TODO: Load current state
   async getState(): Promise<AgentState | null> {
-    throw new Error("Not implemented — use @forge-ai/cli for full functionality");
+    throw new Error("Not implemented — use @openforge-ai/cli for full functionality");
   }
 
   getConfigPath(): string {

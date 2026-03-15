@@ -1,7 +1,7 @@
 import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
-import type { AgentState, ForgeConfig } from "@forge-ai/sdk";
+import type { AgentState, ForgeConfig } from "@openforge-ai/sdk";
 
 const STATE_FILE = "state.json";
 

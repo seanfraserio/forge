@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import chalk from "chalk";
 import { parseForgeYaml } from "./validate.js";
-import type { ForgeConfig } from "@forge-ai/sdk";
+import type { ForgeConfig } from "@openforge-ai/sdk";
 
 export async function loadConfig(configPath: string): Promise<ForgeConfig> {
   const resolved = resolve(configPath);

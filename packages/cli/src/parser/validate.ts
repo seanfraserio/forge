@@ -1,6 +1,6 @@
 import { parse as parseYaml } from "yaml";
 import { forgeConfigSchema } from "./schema.js";
-import type { ForgeConfig } from "@forge-ai/sdk";
+import type { ForgeConfig } from "@openforge-ai/sdk";
 
 export interface ValidationResult {
   success: boolean;

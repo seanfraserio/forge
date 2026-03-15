@@ -1,4 +1,4 @@
-import type { PlanResult, ApplyOptions, ApplyResult, ForgeConfig } from "@forge-ai/sdk";
+import type { PlanResult, ApplyOptions, ApplyResult, ForgeConfig } from "@openforge-ai/sdk";
 import { createState, writeState } from "./state.js";
 
 /**

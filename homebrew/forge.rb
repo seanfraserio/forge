@@ -7,7 +7,7 @@
 class Forge < Formula
   desc "Agent infrastructure as code — the Terraform for AI agents"
   homepage "https://github.com/seanfraserio/forge"
-  url "https://registry.npmjs.org/@forge-ai/cli/-/cli-0.1.0.tgz"
+  url "https://registry.npmjs.org/@openforge-ai/cli/-/cli-0.1.0.tgz"
   sha256 "PLACEHOLDER"
   license "MIT"
 

@@ -32,7 +32,7 @@ importers:
 
   packages/adapters:
     dependencies:
-      '@forge-ai/sdk':
+      '@openforge-ai/sdk':
         specifier: workspace:*
         version: link:../sdk
     devDependencies:
@@ -48,7 +48,7 @@ importers:
 
   packages/cli:
     dependencies:
-      '@forge-ai/sdk':
+      '@openforge-ai/sdk':
         specifier: workspace:*
         version: link:../sdk
       chalk:
@@ -79,7 +79,7 @@ importers:
 
   packages/enterprise:
     dependencies:
-      '@forge-ai/sdk':
+      '@openforge-ai/sdk':
         specifier: workspace:*
         version: link:../sdk
     devDependencies:

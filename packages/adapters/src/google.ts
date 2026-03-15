@@ -1,4 +1,4 @@
-import type { ModelConfig } from "@forge-ai/sdk";
+import type { ModelConfig } from "@openforge-ai/sdk";
 
 export interface GoogleDeployOptions {
   apiKey?: string;
