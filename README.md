@@ -8,8 +8,20 @@ AI agents today are configured through UIs, scattered scripts, and undocumented 
 
 ## Install
 
+**npm** (requires Node.js 20+):
 ```bash
-npm install -g @forge-ai/cli
+npm install -g @openforge-ai/cli
+```
+
+**npx** (no install, one-off execution):
+```bash
+npx @openforge-ai/cli validate -c forge.yaml
+```
+
+**Homebrew** (macOS/Linux):
+```bash
+brew tap seanfraserio/tap
+brew install forge
 ```
 
 ## Quickstart

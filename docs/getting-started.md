@@ -5,12 +5,30 @@ Forge lets you define AI agents as code. This guide walks you through your first
 ## Prerequisites
 
 - Node.js 20+
-- pnpm 8+
 
 ## Install
 
+Choose one of the following methods:
+
+**npm** (global install):
 ```bash
-npm install -g @forge-ai/cli
+npm install -g @openforge-ai/cli
+```
+
+**npx** (no install, run directly):
+```bash
+npx @openforge-ai/cli validate
+```
+
+**Homebrew** (macOS/Linux):
+```bash
+brew tap seanfraserio/tap
+brew install forge
+```
+
+Verify the installation:
+```bash
+forge --version
 ```
 
 ## Create your first agent
