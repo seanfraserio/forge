@@ -1,0 +1,103 @@
+name: Update Homebrew Formula
+
+on:
+  workflow_run:
+    workflows: ["Release"]
+    types: [completed]
+
+jobs:
+  update-formula:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    steps:
+      - name: Extract version from tag
+        id: version
+        run: |
+          TAG="${{ github.event.workflow_run.head_branch }}"
+          VERSION="${TAG#v}"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Detected version: ${VERSION}"
+
+      - name: Wait for npm propagation
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          echo "Waiting for @forge-ai/cli@${VERSION} to appear on npm..."
+          for i in $(seq 1 30); do
+            if npm view "@forge-ai/cli@${VERSION}" version 2>/dev/null; then
+              echo "Package found on npm."
+              exit 0
+            fi
+            echo "Attempt ${i}/30 — not yet available, waiting 10s..."
+            sleep 10
+          done
+          echo "Package not found on npm after 5 minutes."
+          exit 1
+
+      - name: Get tarball SHA256
+        id: sha
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          URL="https://registry.npmjs.org/@forge-ai/cli/-/cli-${VERSION}.tgz"
+          SHA256=$(curl -sL "$URL" | shasum -a 256 | awk '{print $1}')
+          echo "sha256=${SHA256}" >> "$GITHUB_OUTPUT"
+          echo "url=${URL}" >> "$GITHUB_OUTPUT"
+          echo "SHA256: ${SHA256}"
+
+      - name: Update Homebrew formula
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          SHA256="${{ steps.sha.outputs.sha256 }}"
+          URL="${{ steps.sha.outputs.url }}"
+
+          FORMULA=$(cat <<'RUBY'
+          class Forge < Formula
+            desc "Agent infrastructure as code — the Terraform for AI agents"
+            homepage "https://github.com/seanfraserio/forge"
+            url "URL_PLACEHOLDER"
+            sha256 "SHA256_PLACEHOLDER"
+            license "MIT"
+
+            depends_on "node"
+
+            def install
+              system "npm", "install", *std_npm_args
+              bin.install_symlink libexec.glob("bin/*")
+            end
+
+            test do
+              assert_match version.to_s, shell_output("#{bin}/forge --version")
+            end
+          end
+          RUBY
+
+          FORMULA="${FORMULA//URL_PLACEHOLDER/$URL}"
+          FORMULA="${FORMULA//SHA256_PLACEHOLDER/$SHA256}"
+
+          # Base64 encode the formula content
+          CONTENT=$(echo "$FORMULA" | base64 -w 0)
+
+          # Check if file exists (get SHA for update)
+          EXISTING_SHA=$(curl -s \
+            -H "Authorization: token ${HOMEBREW_TAP_TOKEN}" \
+            -H "Accept: application/vnd.github.v3+json" \
+            "https://api.github.com/repos/seanfraserio/homebrew-tap/contents/Formula/forge.rb" \
+            | jq -r '.sha // empty')
+
+          # Create or update the formula
+          if [ -n "$EXISTING_SHA" ]; then
+            curl -s -X PUT \
+              -H "Authorization: token ${HOMEBREW_TAP_TOKEN}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/seanfraserio/homebrew-tap/contents/Formula/forge.rb" \
+              -d "{\"message\":\"forge ${VERSION}\",\"content\":\"${CONTENT}\",\"sha\":\"${EXISTING_SHA}\"}"
+          else
+            curl -s -X PUT \
+              -H "Authorization: token ${HOMEBREW_TAP_TOKEN}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              "https://api.github.com/repos/seanfraserio/homebrew-tap/contents/Formula/forge.rb" \
+              -d "{\"message\":\"forge ${VERSION}\",\"content\":\"${CONTENT}\"}"
+          fi
+
+          echo "Formula updated for version ${VERSION}"

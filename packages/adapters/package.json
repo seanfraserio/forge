@@ -1,7 +1,19 @@
 {
   "name": "@forge-ai/adapters",
   "version": "0.1.0",
+  "description": "LLM provider adapters for Forge agent infrastructure",
   "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/seanfraserio/forge.git",
+    "directory": "packages/adapters"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": ["dist"],
+  "keywords": ["forge", "ai", "agents", "adapters", "anthropic", "openai"],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
