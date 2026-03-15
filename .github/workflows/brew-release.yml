@@ -43,15 +43,13 @@ jobs:
           echo "url=${URL}" >> "$GITHUB_OUTPUT"
           echo "SHA256: ${SHA256}"
 
-      - name: Update Homebrew formula
-        env:
-          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+      - name: Generate formula file
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           SHA256="${{ steps.sha.outputs.sha256 }}"
           URL="${{ steps.sha.outputs.url }}"
 
-          FORMULA=$(cat <<'RUBY'
+          cat > /tmp/forge.rb << 'ENDOFFORMULA'
           class Forge < Formula
             desc "Agent infrastructure as code — the Terraform for AI agents"
             homepage "https://github.com/seanfraserio/forge"
@@ -70,30 +68,32 @@ jobs:
               assert_match version.to_s, shell_output("#{bin}/forge --version")
             end
           end
-          RUBY
+          ENDOFFORMULA
 
-          FORMULA="${FORMULA//URL_PLACEHOLDER/$URL}"
-          FORMULA="${FORMULA//SHA256_PLACEHOLDER/$SHA256}"
+          sed -i "s|URL_PLACEHOLDER|${URL}|g" /tmp/forge.rb
+          sed -i "s|SHA256_PLACEHOLDER|${SHA256}|g" /tmp/forge.rb
 
-          # Base64 encode the formula content
-          CONTENT=$(echo "$FORMULA" | base64 -w 0)
+      - name: Update Homebrew tap
+        env:
+          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          CONTENT=$(base64 -w 0 < /tmp/forge.rb)
 
-          # Check if file exists (get SHA for update)
           EXISTING_SHA=$(curl -s \
             -H "Authorization: token ${HOMEBREW_TAP_TOKEN}" \
             -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/seanfraserio/homebrew-tap/contents/Formula/forge.rb" \
             | jq -r '.sha // empty')
 
-          # Create or update the formula
           if [ -n "$EXISTING_SHA" ]; then
-            curl -s -X PUT \
+            curl -sf -X PUT \
               -H "Authorization: token ${HOMEBREW_TAP_TOKEN}" \
               -H "Accept: application/vnd.github.v3+json" \
               "https://api.github.com/repos/seanfraserio/homebrew-tap/contents/Formula/forge.rb" \
               -d "{\"message\":\"forge ${VERSION}\",\"content\":\"${CONTENT}\",\"sha\":\"${EXISTING_SHA}\"}"
           else
-            curl -s -X PUT \
+            curl -sf -X PUT \
               -H "Authorization: token ${HOMEBREW_TAP_TOKEN}" \
               -H "Accept: application/vnd.github.v3+json" \
               "https://api.github.com/repos/seanfraserio/homebrew-tap/contents/Formula/forge.rb" \
