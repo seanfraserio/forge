@@ -124,7 +124,7 @@
       <a href="#how-it-works">How It Works</a>
       <a href="#config">Configuration</a>
       <a href="#architecture">Architecture</a>
-      <a href="#enterprise">Enterprise</a>
+      <a href="https://enterprise.openforgeai.org">Enterprise</a>
       <a href="https://github.com/seanfraserio/forge" class="nav-gh" target="_blank">GitHub</a>
     </div>
   </div>
@@ -138,7 +138,7 @@
     <a href="https://github.com/seanfraserio/forge" class="btn btn-primary" target="_blank">View on GitHub</a>
     <a href="#how-it-works" class="btn btn-secondary">How It Works</a>
   </div>
-  <div class="install-cmd"><span class="dollar">$</span>npm install -g @forge-ai/cli</div>
+  <div class="install-cmd"><span class="dollar">$</span>npm install -g @openforge-ai/cli</div>
 </div>
 
 <!-- How it works -->
@@ -288,19 +288,19 @@
 
   <div class="arch-grid">
     <div class="arch-pkg">
-      <h4>@forge-ai/cli</h4>
+      <h4>@openforge-ai/cli</h4>
       <p>CLI binary. Commands: deploy, diff, rollback, validate. Contains the Zod schema, diff engine, and state manager.</p>
     </div>
     <div class="arch-pkg">
-      <h4>@forge-ai/sdk</h4>
+      <h4>@openforge-ai/sdk</h4>
       <p>TypeScript types and programmatic API. ForgeConfig, AgentState, PlanResult — all shared types live here.</p>
     </div>
     <div class="arch-pkg">
-      <h4>@forge-ai/adapters</h4>
+      <h4>@openforge-ai/adapters</h4>
       <p>Provider integrations. Anthropic, OpenAI, Google, Ollama. Each validates models and translates config to SDK params.</p>
     </div>
     <div class="arch-pkg">
-      <h4>@forge-ai/enterprise</h4>
+      <h4>@openforge-ai/enterprise</h4>
       <p>BUSL-1.1 licensed. Audit trail, RBAC, gated env promotion, secrets injection from Vault/SSM.</p>
     </div>
   </div>
@@ -402,7 +402,7 @@ forge.yaml is validated at parse time. Agent names must match
   <div class="code-block">
     <div class="code-header"><span class="code-filename">Terminal</span><span class="code-lang">shell</span></div>
     <div class="code-body"><span class="comment"># Install</span>
-<span class="cmd">$ npm install -g @forge-ai/cli</span>
+<span class="cmd">$ npm install -g @openforge-ai/cli</span>
 
 <span class="comment"># Create a minimal agent config</span>
 <span class="cmd">$ cat forge.yaml</span>
@@ -432,7 +432,7 @@ forge.yaml is validated at parse time. Agent names must match
     <a href="https://github.com/seanfraserio/forge">GitHub</a>
     <a href="https://github.com/seanfraserio/forge/tree/main/docs">Docs</a>
     <a href="https://github.com/seanfraserio/forge/blob/main/CONTRIBUTING.md">Contributing</a>
-    <a href="mailto:enterprise@forge-ai.dev">Enterprise</a>
+    <a href="https://enterprise.openforgeai.org">Enterprise</a>
   </div>
 </footer>
 
