@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Welcome to Forge Enterprise</title>
+<meta name="description" content="Your Forge Enterprise purchase is confirmed. Here's how to get started." />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9881;</text></svg>" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg: #ffffff;
+    --surface: #f0f2f5;
+    --surface2: #e8ebf0;
+    --border: #d4d8e0;
+    --text: #1a1e28;
+    --text-dim: #5a6178;
+    --accent: #5b8af5;
+    --accent-dim: rgba(91,138,245,0.1);
+    --green: #16a34a;
+    --mono: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, monospace;
+    --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--sans); background: var(--bg); color: var(--text); line-height: 1.6; }
+
+  nav { background: rgba(255,255,255,0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+  .nav-inner { max-width: 800px; margin: 0 auto; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; }
+  .nav-logo { font-size: 18px; font-weight: 700; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .nav-logo span { color: var(--accent); }
+
+  .content { max-width: 800px; margin: 0 auto; padding: 80px 24px; }
+
+  .success-icon { font-size: 64px; margin-bottom: 24px; }
+  h1 { font-size: 36px; font-weight: 800; letter-spacing: -1px; margin-bottom: 12px; }
+  .lead { font-size: 18px; color: var(--text-dim); margin-bottom: 48px; max-width: 560px; }
+
+  h2 { font-size: 20px; font-weight: 700; margin-bottom: 8px; margin-top: 40px; }
+  h2:first-of-type { margin-top: 0; }
+
+  .step-list { list-style: none; counter-reset: steps; }
+  .step-list li { counter-increment: steps; padding: 16px 0; border-bottom: 1px solid var(--border); font-size: 15px; color: var(--text-dim); display: flex; gap: 16px; align-items: flex-start; }
+  .step-list li::before { content: counter(steps); font-size: 13px; font-weight: 700; color: var(--accent); background: var(--accent-dim); width: 28px; height: 28px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+  .step-list li strong { color: var(--text); }
+
+  .install-cmd { display: inline-block; background: #f6f8fa; border: 1px solid #e2e6ec; border-radius: 8px; padding: 12px 24px; font-family: var(--mono); font-size: 14px; color: var(--green); margin: 20px 0; }
+  .install-cmd .dollar { color: var(--text-dim); margin-right: 8px; }
+
+  .links { margin-top: 48px; padding-top: 32px; border-top: 1px solid var(--border); }
+  .links h2 { margin-top: 0; margin-bottom: 16px; }
+  .link-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+  .link-card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; text-decoration: none; color: var(--text); transition: border-color 0.15s; }
+  .link-card:hover { border-color: var(--accent); }
+  .link-card h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+  .link-card p { font-size: 13px; color: var(--text-dim); }
+
+  .support-note { margin-top: 40px; padding: 20px 24px; background: var(--accent-dim); border-radius: 10px; font-size: 14px; color: var(--text-dim); }
+  .support-note strong { color: var(--text); }
+
+  @media (max-width: 480px) {
+    .content { padding: 60px 16px; }
+    h1 { font-size: 28px; }
+    .link-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="/enterprise.html" class="nav-logo"><span>&#9881;</span> Forge Enterprise</a>
+  </div>
+</nav>
+
+<div class="content">
+  <div class="success-icon">&#9989;</div>
+  <h1>Welcome to Forge Enterprise</h1>
+  <p class="lead">Your purchase is confirmed. Here's how to get your team set up with enterprise governance in the next 15 minutes.</p>
+
+  <h2>Quick Start</h2>
+  <div class="install-cmd"><span class="dollar">$</span>npm install @openforge-ai/enterprise</div>
+
+  <ol class="step-list">
+    <li><strong>Install the enterprise package</strong> alongside your existing Forge CLI. It works as a drop-in addition.</li>
+    <li><strong>Follow the integration guide</strong> — it walks you through audit logging, RBAC, promotions, and secrets step by step.</li>
+    <li><strong>Set up your team's roles</strong> — define who can deploy to dev, staging, and production. The guide includes a role matrix template.</li>
+    <li><strong>Wire into CI/CD</strong> — the guide includes complete GitHub Actions workflows with RBAC checks, audit logging, and secrets injection.</li>
+    <li><strong>Run the production readiness checklist</strong> — security, operational, and go-live checks before your first governed deploy.</li>
+  </ol>
+
+  <div class="links">
+    <h2>Resources</h2>
+    <div class="link-grid">
+      <a href="https://github.com/seanfraserio/forge/blob/main/docs/enterprise-integration-guide.md" class="link-card" target="_blank">
+        <h3>Integration Guide</h3>
+        <p>Step-by-step setup for your team</p>
+      </a>
+      <a href="https://github.com/seanfraserio/forge/blob/main/docs/api-reference.md" class="link-card" target="_blank">
+        <h3>API Reference</h3>
+        <p>Every method, type, and option</p>
+      </a>
+      <a href="https://github.com/seanfraserio/forge/blob/main/docs/enterprise.md" class="link-card" target="_blank">
+        <h3>Enterprise Docs</h3>
+        <p>Feature overview and architecture</p>
+      </a>
+      <a href="https://github.com/seanfraserio/forge" class="link-card" target="_blank">
+        <h3>GitHub</h3>
+        <p>Source code and issue tracker</p>
+      </a>
+    </div>
+  </div>
+
+  <div class="support-note">
+    <strong>Integration support included.</strong> Your purchase includes hands-on help getting Forge Enterprise into your deployment pipeline. Email <a href="mailto:enterprise@openforgeai.org" style="color: var(--accent);">enterprise@openforgeai.org</a> with your receipt and we'll schedule a setup session.
+  </div>
+</div>
+
+</body>
+</html>
