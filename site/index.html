@@ -28,42 +28,33 @@
   body { font-family: var(--sans); background: var(--bg); color: var(--text); line-height: 1.6; }
 
   /* ── Nav ── */
-  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,12,16,0.85); backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
-  .nav-inner { max-width: 1100px; margin: 0 auto; padding: 14px 24px; display: flex; justify-content: space-between; align-items: center; }
-  .nav-logo { font-size: 18px; font-weight: 700; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 8px; }
-  .nav-logo img { width: 28px; height: 28px; border-radius: 6px; }
-  .nav-links { display: flex; gap: 28px; align-items: center; }
+  nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; background: rgba(10,12,16,0.8); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+  .nav-inner { max-width: 960px; margin: 0 auto; padding: 16px 24px; display: flex; justify-content: space-between; align-items: center; }
+  .nav-logo { font-size: 17px; font-weight: 700; color: var(--text); text-decoration: none; display: flex; align-items: center; gap: 8px; }
+  .nav-logo img { width: 24px; height: 24px; border-radius: 5px; }
+  .nav-links { display: flex; gap: 24px; align-items: center; }
   .nav-links a { color: var(--text-dim); text-decoration: none; font-size: 14px; transition: color 0.15s; }
   .nav-links a:hover { color: var(--text); }
-  .nav-gh { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border: 1px solid var(--border); border-radius: 6px; font-size: 13px; }
-  .nav-gh:hover { border-color: var(--accent); color: var(--text) !important; }
+  .nav-gh svg { width: 20px; height: 20px; fill: var(--text-dim); transition: fill 0.15s; vertical-align: middle; }
+  .nav-gh:hover svg { fill: var(--text); }
 
   /* ── Hero ── */
-  .hero { max-width: 1100px; margin: 0 auto; padding: 140px 24px 80px; text-align: center; }
-  .hero h1 { font-size: clamp(32px, 5vw, 52px); font-weight: 800; letter-spacing: -1px; line-height: 1.15; margin-bottom: 20px; }
-  .hero h1 span { color: var(--accent); }
-  .hero p { font-size: 18px; color: var(--text-dim); max-width: 620px; margin: 0 auto 36px; }
-  .hero-actions { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-  .btn { padding: 10px 24px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.15s; font-family: var(--sans); cursor: pointer; border: none; }
+  .hero { max-width: 960px; margin: 0 auto; padding: 120px 24px 0; display: grid; grid-template-columns: 1fr 1.2fr; gap: 48px; align-items: center; min-height: 80vh; }
+  .hero-text h1 { font-size: clamp(28px, 4vw, 42px); font-weight: 800; letter-spacing: -0.5px; line-height: 1.15; margin-bottom: 20px; }
+  .hero-text h1 span { color: var(--accent); }
+  .hero-text p { font-size: 16px; color: var(--text-dim); line-height: 1.7; margin-bottom: 12px; }
+  .hero-text .install { font-family: var(--mono); font-size: 13px; color: var(--green); margin-bottom: 32px; }
+  .hero-text .install .dollar { color: var(--text-dim); }
+  .hero-actions { display: flex; gap: 12px; }
+  .btn { padding: 10px 22px; border-radius: 8px; font-size: 14px; font-weight: 600; text-decoration: none; transition: all 0.15s; font-family: var(--sans); cursor: pointer; border: none; display: inline-flex; align-items: center; gap: 6px; }
   .btn-primary { background: var(--accent); color: #fff; }
-  .btn-primary:hover { background: #4a7ae8; }
-  .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
-  .btn-secondary:hover { border-color: var(--accent); }
-  .install-cmd { margin-top: 40px; display: inline-block; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 12px 24px; font-family: var(--mono); font-size: 14px; color: var(--green); }
-  .install-cmd .dollar { color: var(--text-dim); margin-right: 8px; }
-
-  /* ── Sections ── */
-  section { max-width: 1100px; margin: 0 auto; padding: 80px 24px; }
-  .section-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent); margin-bottom: 12px; }
-  section h2 { font-size: 28px; font-weight: 700; margin-bottom: 8px; letter-spacing: -0.5px; }
-  section .subtitle { color: var(--text-dim); font-size: 16px; margin-bottom: 40px; max-width: 600px; }
+  .btn-primary:hover { background: #c2410c; }
+  .btn-secondary { background: transparent; color: var(--text-dim); border: 1px solid var(--border); }
+  .btn-secondary:hover { border-color: var(--text-dim); color: var(--text); }
 
   /* ── Code blocks ── */
   .code-block { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
-  .code-header { padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-  .code-filename { font-family: var(--mono); font-size: 12px; color: var(--text-dim); }
-  .code-lang { font-size: 11px; color: var(--accent); background: var(--accent-dim); padding: 2px 8px; border-radius: 4px; }
-  .code-body { padding: 20px; font-family: var(--mono); font-size: 13px; line-height: 1.7; overflow-x: auto; white-space: pre; }
+  .code-body { padding: 24px; font-family: var(--mono); font-size: 13px; line-height: 1.8; overflow-x: auto; white-space: pre; }
   .code-body .key { color: var(--accent); }
   .code-body .str { color: var(--green); }
   .code-body .comment { color: var(--text-dim); }
@@ -72,47 +63,42 @@
   .code-body .flag { color: var(--purple); }
   .code-body .output { color: var(--text-dim); }
   .code-body .add { color: var(--green); }
-  .code-body .change { color: var(--orange); }
-  .code-body .remove { color: var(--red); }
 
-  /* ── How it works ── */
-  .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 40px; }
-  .step { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
-  .step-num { font-size: 12px; font-weight: 700; color: var(--accent); margin-bottom: 8px; }
-  .step h3 { font-size: 16px; font-weight: 600; margin-bottom: 6px; }
-  .step p { font-size: 14px; color: var(--text-dim); }
+  /* ── Terminal strip ── */
+  .terminal-strip { max-width: 960px; margin: 0 auto; padding: 48px 24px 0; }
 
-  /* ── Two column ── */
-  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
-  @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+  /* ── Features ── */
+  .features-section { max-width: 960px; margin: 0 auto; padding: 80px 24px 0; }
+  .features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .feature { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 22px; }
+  .feature h3 { font-size: 14px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .feature-icon { font-size: 16px; }
+  .feature p { font-size: 13px; color: var(--text-dim); line-height: 1.5; }
 
-  /* ── Feature grid ── */
-  .features { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; }
-  .feature { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 24px; }
-  .feature h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; display: flex; align-items: center; gap: 8px; }
-  .feature p { font-size: 14px; color: var(--text-dim); }
-  .feature-icon { font-size: 18px; }
-
-  /* ── Table ── */
-  .comparison-table { width: 100%; border-collapse: collapse; }
-  .comparison-table th, .comparison-table td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
-  .comparison-table th { color: var(--text-dim); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+  /* ── Enterprise table ── */
+  .enterprise-section { max-width: 960px; margin: 0 auto; padding: 80px 24px 0; }
+  .enterprise-section h2 { font-size: 22px; font-weight: 700; margin-bottom: 24px; letter-spacing: -0.3px; }
+  .comparison-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+  .comparison-table th, .comparison-table td { padding: 12px 20px; text-align: left; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .comparison-table tr:last-child td { border-bottom: none; }
+  .comparison-table th { color: var(--text-dim); font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; background: var(--surface2); }
   .comparison-table td:nth-child(2), .comparison-table td:nth-child(3) { text-align: center; }
   .comparison-table th:nth-child(2), .comparison-table th:nth-child(3) { text-align: center; }
-  .check { color: var(--green); } .dash { color: var(--text-dim); }
-
-  /* ── Architecture ── */
-  .arch-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
-  .arch-pkg { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
-  .arch-pkg h4 { font-family: var(--mono); font-size: 13px; color: var(--accent); margin-bottom: 4px; }
-  .arch-pkg p { font-size: 13px; color: var(--text-dim); }
+  .check { color: var(--green); }
+  .dash { color: var(--text-dim); }
 
   /* ── Footer ── */
-  footer { max-width: 1100px; margin: 0 auto; padding: 40px 24px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; }
-  footer a { color: var(--text-dim); text-decoration: none; font-size: 14px; }
+  footer { max-width: 960px; margin: 0 auto; padding: 64px 24px 32px; display: flex; justify-content: center; align-items: center; gap: 24px; flex-wrap: wrap; }
+  footer span, footer a { font-size: 13px; color: var(--text-dim); text-decoration: none; }
   footer a:hover { color: var(--text); }
-  .footer-links { display: flex; gap: 24px; }
-  .footer-copy { font-size: 13px; color: var(--text-dim); }
+  footer .sep { color: var(--border); }
+
+  /* ── Responsive ── */
+  @media (max-width: 720px) {
+    .hero { grid-template-columns: 1fr; padding-top: 100px; min-height: auto; gap: 32px; }
+    .features { grid-template-columns: 1fr; }
+    .nav-links { gap: 16px; }
+  }
 </style>
 </head>
 <body>
@@ -121,319 +107,125 @@
   <div class="nav-inner">
     <a href="/" class="nav-logo"><img src="/favicon.svg" alt="Forge"> Forge</a>
     <div class="nav-links">
-      <a href="#how-it-works">How It Works</a>
-      <a href="#config">Configuration</a>
-      <a href="#architecture">Architecture</a>
+      <a href="https://github.com/seanfraserio/forge/tree/main/docs">Docs</a>
       <a href="https://enterprise.openforgeai.org">Enterprise</a>
-      <a href="https://github.com/seanfraserio/forge" class="nav-gh" target="_blank">GitHub</a>
+      <a href="https://github.com/seanfraserio/forge" class="nav-gh" target="_blank"><svg viewBox="0 0 16 16"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg></a>
     </div>
   </div>
 </nav>
 
 <!-- Hero -->
 <div class="hero">
-  <h1><span>Agent infrastructure</span> as code</h1>
-  <p>Define AI agents as versioned configuration. Deploy idempotently. Diff against live state. Roll back to any prior version. No more snowflake agents.</p>
-  <div class="hero-actions">
-    <a href="https://github.com/seanfraserio/forge" class="btn btn-primary" target="_blank">View on GitHub</a>
-    <a href="#how-it-works" class="btn btn-secondary">How It Works</a>
-  </div>
-  <div class="install-cmd"><span class="dollar">$</span>npm install -g @openforge-ai/cli</div>
-</div>
-
-<!-- How it works -->
-<section id="how-it-works">
-  <div class="section-label">How It Works</div>
-  <h2>Terraform-style plan/apply for AI agents</h2>
-  <p class="subtitle">Declare your agent in a forge.yaml file. Forge handles the rest.</p>
-
-  <div class="steps">
-    <div class="step">
-      <div class="step-num">01</div>
-      <h3>Define</h3>
-      <p>Write a <code>forge.yaml</code> describing your agent's model, tools, memory, and MCP servers.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">02</div>
-      <h3>Validate</h3>
-      <p><code>forge validate</code> checks your config against the schema. Catches errors before deploy.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">03</div>
-      <h3>Plan</h3>
-      <p><code>forge diff</code> shows exactly what would change. Creates, updates, deletes — all visible.</p>
-    </div>
-    <div class="step">
-      <div class="step-num">04</div>
-      <h3>Apply</h3>
-      <p><code>forge deploy</code> applies changes idempotently. Same config twice = no-op. State is tracked via SHA-256 hash.</p>
+  <div class="hero-text">
+    <h1><span>Agent infrastructure</span><br>as code</h1>
+    <p>Define agents in YAML. Deploy with one command.<br>Version, diff, and rollback like Terraform.</p>
+    <p class="install"><span class="dollar">$ </span>npm install -g @openforge-ai/cli</p>
+    <div class="hero-actions">
+      <a href="https://github.com/seanfraserio/forge/tree/main/docs" class="btn btn-primary">Get Started &rarr;</a>
+      <a href="https://github.com/seanfraserio/forge" class="btn btn-secondary" target="_blank">GitHub &rarr;</a>
     </div>
   </div>
-
   <div class="code-block">
-    <div class="code-header"><span class="code-filename">Terminal</span><span class="code-lang">shell</span></div>
-    <div class="code-body"><span class="cmd">$ forge deploy</span> <span class="flag">--env production</span>
-<span class="output">&#x2192; Agent: support-triage | Environment: production | Model: anthropic/claude-sonnet-4-5</span>
-
-<span class="output">Resources to CREATE:</span>
-  <span class="add">+ Create agent "support-triage"</span>
-  <span class="add">+ Configure model anthropic/claude-sonnet-4-5</span>
-  <span class="add">+ Add MCP server "filesystem"</span>
-  <span class="add">+ Add MCP server "brave-search"</span>
-
-<span class="output">Plan: 4 to add, 0 to change, 0 to destroy.</span>
-
-<span class="add">&#x2713; Successfully deployed "support-triage" to production</span>
-<span class="output">  State written to .forge/state.json</span>
-<span class="output">  Config hash: 84ef0d1ddb5f...</span>
-
-<span class="cmd">$ forge deploy</span> <span class="flag">--env production</span>
-<span class="output">&#x2192; Agent: support-triage | Environment: production</span>
-
-<span class="output">No changes. Infrastructure is up to date.</span>
-  <span class="output">Agent "support-triage" is up to date (hash: 84ef0d1d)</span></div>
-  </div>
-</section>
-
-<!-- Configuration -->
-<section id="config">
-  <div class="section-label">Configuration</div>
-  <h2>One file describes your entire agent</h2>
-  <p class="subtitle">Model, tools, memory, environments, and deploy hooks — all in one place, version-controlled.</p>
-
-  <div class="two-col">
-    <div class="code-block">
-      <div class="code-header"><span class="code-filename">forge.yaml</span><span class="code-lang">yaml</span></div>
-      <div class="code-body"><span class="key">version</span>: <span class="str">"1"</span>
+    <div class="code-body"><span class="comment"># forge.yaml</span>
+<span class="key">version</span>: <span class="str">"1"</span>
 
 <span class="key">agent</span>:
   <span class="key">name</span>: <span class="str">support-triage</span>
-  <span class="key">description</span>: <span class="str">"Classifies and routes support tickets"</span>
+  <span class="key">description</span>: <span class="str">"Routes support tickets"</span>
 
 <span class="key">model</span>:
   <span class="key">provider</span>: <span class="str">anthropic</span>
   <span class="key">name</span>: <span class="str">claude-sonnet-4-5-20251001</span>
   <span class="key">temperature</span>: <span class="num">0.3</span>
-  <span class="key">max_tokens</span>: <span class="num">2048</span>
-
-<span class="key">system_prompt</span>:
-  <span class="key">file</span>: <span class="str">./prompts/system.md</span>
 
 <span class="key">tools</span>:
   <span class="key">mcp_servers</span>:
     - <span class="key">name</span>: <span class="str">filesystem</span>
       <span class="key">command</span>: <span class="str">npx</span>
-      <span class="key">args</span>: [<span class="str">"-y"</span>, <span class="str">"@mcp/server-filesystem"</span>]
+      <span class="key">args</span>: [<span class="str">"@mcp/server-filesystem"</span>]
     - <span class="key">name</span>: <span class="str">brave-search</span>
       <span class="key">command</span>: <span class="str">npx</span>
-      <span class="key">args</span>: [<span class="str">"-y"</span>, <span class="str">"@mcp/server-brave-search"</span>]
-      <span class="key">env</span>:
-        <span class="key">BRAVE_API_KEY</span>: <span class="str">"${BRAVE_API_KEY}"</span>
-
-<span class="key">memory</span>:
-  <span class="key">type</span>: <span class="str">vector</span>
-  <span class="key">provider</span>: <span class="str">chroma</span>
-  <span class="key">collection</span>: <span class="str">support-memory</span>
+      <span class="key">args</span>: [<span class="str">"@mcp/server-brave-search"</span>]
 
 <span class="key">environments</span>:
   <span class="key">dev</span>:
-    <span class="key">model</span>:
-      <span class="key">name</span>: <span class="str">claude-haiku-4-5-20251001</span>
-  <span class="key">staging</span>: {}
+    <span class="key">model</span>: { <span class="key">name</span>: <span class="str">claude-haiku-4-5</span> }
   <span class="key">production</span>:
-    <span class="key">model</span>:
-      <span class="key">temperature</span>: <span class="num">0.1</span>
-
-<span class="key">hooks</span>:
-  <span class="key">pre_deploy</span>:
-    - <span class="key">run</span>: <span class="str">"pnpm test"</span></div>
-    </div>
-
-    <div>
-      <div class="features" style="grid-template-columns: 1fr;">
-        <div class="feature">
-          <h3><span class="feature-icon">&#9881;</span> Multi-Provider</h3>
-          <p>Anthropic, OpenAI, Google Gemini, Ollama, Bedrock. Switch providers by changing one line.</p>
-        </div>
-        <div class="feature">
-          <h3><span class="feature-icon">&#128268;</span> MCP Servers</h3>
-          <p>Declare MCP tool servers alongside your agent. Filesystem, search, databases — managed as config.</p>
-        </div>
-        <div class="feature">
-          <h3><span class="feature-icon">&#127758;</span> Environments</h3>
-          <p>Dev, staging, production overrides in one file. Use Haiku for dev, Sonnet for prod. <code>--env</code> selects the target.</p>
-        </div>
-        <div class="feature">
-          <h3><span class="feature-icon">&#128274;</span> Idempotent Deploys</h3>
-          <p>Every config is SHA-256 hashed. Deploy twice with the same config = no-op. State is tracked in <code>.forge/state.json</code>.</p>
-        </div>
-        <div class="feature">
-          <h3><span class="feature-icon">&#128218;</span> Drift Detection</h3>
-          <p><code>forge diff</code> compares desired state to actual. See exactly what changed, field by field, before applying.</p>
-        </div>
-        <div class="feature">
-          <h3><span class="feature-icon">&#9881;</span> Deploy Hooks</h3>
-          <p>Run tests before deploy, send notifications after. <code>--allow-hooks</code> required for security — commands are shown before execution.</p>
-        </div>
-      </div>
-    </div>
+    <span class="key">model</span>: { <span class="key">temperature</span>: <span class="num">0.1</span> }</div>
   </div>
-</section>
+</div>
 
-<!-- Architecture -->
-<section id="architecture">
-  <div class="section-label">Architecture</div>
-  <h2>Monorepo package structure</h2>
-  <p class="subtitle">Clean separation of concerns. Types in the SDK, logic in the CLI, providers in adapters.</p>
-
-  <div class="arch-grid">
-    <div class="arch-pkg">
-      <h4>@openforge-ai/cli</h4>
-      <p>CLI binary. Commands: deploy, diff, rollback, validate. Contains the Zod schema, diff engine, and state manager.</p>
-    </div>
-    <div class="arch-pkg">
-      <h4>@openforge-ai/sdk</h4>
-      <p>TypeScript types and programmatic API. ForgeConfig, AgentState, PlanResult — all shared types live here.</p>
-    </div>
-    <div class="arch-pkg">
-      <h4>@openforge-ai/adapters</h4>
-      <p>Provider integrations. Anthropic, OpenAI, Google, Ollama. Each validates models and translates config to SDK params.</p>
-    </div>
-    <div class="arch-pkg">
-      <h4>@openforge-ai/enterprise</h4>
-      <p>BUSL-1.1 licensed. Audit trail, RBAC, gated env promotion, secrets injection from Vault/SSM.</p>
-    </div>
-  </div>
-
-  <div style="margin-top: 32px;">
-    <div class="code-block">
-      <div class="code-header"><span class="code-filename">Key Design Decisions</span></div>
-      <div class="code-body"><span class="comment">// Idempotency model</span>
-Every config is SHA-256 hashed. deploy() compares the desired hash
-against .forge/state.json. If hashes match, it's a no-op.
-
-<span class="comment">// Plan/Apply cycle (borrowed from Terraform)</span>
-plan() computes a diff between desired and actual state.
-apply() executes the plan. --dry-run shows the plan without applying.
-
-<span class="comment">// State is local</span>
-.forge/state.json is not committed to git. Each deployment target
-maintains its own state. Written with 0o600 permissions.
-
-<span class="comment">// Environment overrides</span>
-Shallow merge on top of root config. dev/staging/production are
-just patches — simple mental model, no inheritance chains.
-
-<span class="comment">// Zod for schema validation</span>
-forge.yaml is validated at parse time. Agent names must match
-/^[a-z0-9-]+$/. Temperature is bounded 0-2. Providers are enum'd.</div>
-    </div>
-  </div>
-</section>
-
-<!-- CLI Reference -->
-<section>
-  <div class="section-label">CLI Reference</div>
-  <h2>Four commands. That's it.</h2>
-  <p class="subtitle">Simple, predictable, scriptable.</p>
-
+<!-- Terminal strip -->
+<div class="terminal-strip">
   <div class="code-block">
-    <div class="code-header"><span class="code-filename">Terminal</span><span class="code-lang">shell</span></div>
-    <div class="code-body"><span class="comment"># Validate configuration against schema</span>
-<span class="cmd">$ forge validate</span> <span class="flag">-c forge.yaml</span>
-<span class="add">&#x2713; Configuration is valid.</span>
-<span class="output">  Agent: support-triage</span>
-<span class="output">  Model: anthropic/claude-sonnet-4-5-20251001</span>
-<span class="output">  Environments: dev, staging, production</span>
+    <div class="code-body"><span class="cmd">$ forge deploy</span> <span class="flag">--env production</span>
+<span class="add">&#x2713; Deployed "support-triage" to production</span> <span class="output">(84ef0d1d)</span>
 
-<span class="comment"># Preview what would change</span>
-<span class="cmd">$ forge diff</span> <span class="flag">--env production</span>
-<span class="change">~ Change temperature: 0.3 &#x2192; 0.1</span>
-<span class="remove">- Remove MCP server "brave-search"</span>
-<span class="add">+ Add MCP server "postgres"</span>
-
-<span class="comment"># Apply changes (with confirmation)</span>
 <span class="cmd">$ forge deploy</span> <span class="flag">--env production</span>
-<span class="cmd">$ forge deploy</span> <span class="flag">--env production --auto-approve</span>  <span class="comment"># for CI</span>
-<span class="cmd">$ forge deploy</span> <span class="flag">--dry-run</span>                     <span class="comment"># plan only</span>
-
-<span class="comment"># Roll back to a previous state</span>
-<span class="cmd">$ forge rollback</span> <span class="flag">--target 84ef0d1d</span></div>
+<span class="output">No changes. Infrastructure is up to date.</span></div>
   </div>
-</section>
+</div>
+
+<!-- Features -->
+<div class="features-section">
+  <div class="features">
+    <div class="feature">
+      <h3><span class="feature-icon">&#9881;</span> Multi-Provider</h3>
+      <p>Anthropic, OpenAI, Google, Ollama, Bedrock</p>
+    </div>
+    <div class="feature">
+      <h3><span class="feature-icon">&#128268;</span> MCP Servers</h3>
+      <p>Declare tool servers alongside your agent</p>
+    </div>
+    <div class="feature">
+      <h3><span class="feature-icon">&#127758;</span> Environments</h3>
+      <p>Dev, staging, production in one file</p>
+    </div>
+    <div class="feature">
+      <h3><span class="feature-icon">&#128274;</span> Idempotent Deploys</h3>
+      <p>SHA-256 hashed config, deploy twice = no-op</p>
+    </div>
+    <div class="feature">
+      <h3><span class="feature-icon">&#128202;</span> Drift Detection</h3>
+      <p><code style="color:var(--green);font-family:var(--mono);font-size:12px;">forge diff</code> shows field-by-field changes</p>
+    </div>
+    <div class="feature">
+      <h3><span class="feature-icon">&#129683;</span> Deploy Hooks</h3>
+      <p>Run tests before deploy, notify after</p>
+    </div>
+  </div>
+</div>
 
 <!-- Enterprise -->
-<section id="enterprise">
-  <div class="section-label">OSS vs Enterprise</div>
-  <h2>Open core, enterprise governance</h2>
-  <p class="subtitle">The OSS core handles everything individual developers and small teams need. Enterprise adds governance for production agent fleets.</p>
-
-  <div class="code-block" style="overflow-x: auto;">
-    <table class="comparison-table">
-      <thead>
-        <tr>
-          <th>Feature</th>
-          <th>OSS (MIT)</th>
-          <th>Enterprise (BUSL-1.1)</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr><td>forge.yaml parsing + validation</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
-        <tr><td>deploy / diff / rollback</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
-        <tr><td>Multi-environment overrides</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
-        <tr><td>MCP server management</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
-        <tr><td>Multi-provider support</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
-        <tr><td>Immutable audit trail</td><td class="dash">&#x2014;</td><td class="check">&#x2713;</td></tr>
-        <tr><td>RBAC on deployments</td><td class="dash">&#x2014;</td><td class="check">&#x2713;</td></tr>
-        <tr><td>Gated environment promotion</td><td class="dash">&#x2014;</td><td class="check">&#x2713;</td></tr>
-        <tr><td>Secrets manager (Vault, SSM)</td><td class="dash">&#x2014;</td><td class="check">&#x2713;</td></tr>
-        <tr><td>SSO / SAML</td><td class="dash">&#x2014;</td><td class="check">&#x2713;</td></tr>
-        <tr><td>SLA + support</td><td class="dash">&#x2014;</td><td class="check">&#x2713;</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
-
-<!-- Getting Started -->
-<section>
-  <div class="section-label">Getting Started</div>
-  <h2>Up and running in 60 seconds</h2>
-
-  <div class="code-block">
-    <div class="code-header"><span class="code-filename">Terminal</span><span class="code-lang">shell</span></div>
-    <div class="code-body"><span class="comment"># Install</span>
-<span class="cmd">$ npm install -g @openforge-ai/cli</span>
-
-<span class="comment"># Create a minimal agent config</span>
-<span class="cmd">$ cat forge.yaml</span>
-<span class="key">version</span>: <span class="str">"1"</span>
-<span class="key">agent</span>:
-  <span class="key">name</span>: <span class="str">my-first-agent</span>
-<span class="key">model</span>:
-  <span class="key">provider</span>: <span class="str">anthropic</span>
-  <span class="key">name</span>: <span class="str">claude-sonnet-4-5-20251001</span>
-  <span class="key">temperature</span>: <span class="num">0.7</span>
-  <span class="key">max_tokens</span>: <span class="num">4096</span>
-<span class="key">system_prompt</span>:
-  <span class="key">inline</span>: <span class="str">"You are a helpful assistant."</span>
-<span class="key">memory</span>:
-  <span class="key">type</span>: <span class="str">none</span>
-
-<span class="comment"># Validate, preview, deploy</span>
-<span class="cmd">$ forge validate</span>
-<span class="cmd">$ forge diff</span>
-<span class="cmd">$ forge deploy</span> <span class="flag">--env dev</span></div>
-  </div>
-</section>
+<div class="enterprise-section">
+  <h2>Open source core, enterprise governance</h2>
+  <table class="comparison-table">
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>OSS (MIT)</th>
+        <th>Enterprise</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Deploy, diff, rollback, validate</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
+      <tr><td>Multi-provider + MCP servers</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
+      <tr><td>Environments + deploy hooks</td><td class="check">&#x2713;</td><td class="check">&#x2713;</td></tr>
+      <tr><td>Audit trail + RBAC</td><td class="dash">&#x2014;</td><td class="check">&#x2713;</td></tr>
+      <tr><td>Gated environment promotion</td><td class="dash">&#x2014;</td><td class="check">&#x2713;</td></tr>
+      <tr><td>Secrets manager (Vault, SSM)</td><td class="dash">&#x2014;</td><td class="check">&#x2713;</td></tr>
+    </tbody>
+  </table>
+</div>
 
 <footer>
-  <span class="footer-copy">MIT License &middot; Forge AI Contributors</span>
-  <div class="footer-links">
-    <a href="https://github.com/seanfraserio/forge">GitHub</a>
-    <a href="https://github.com/seanfraserio/forge/tree/main/docs">Docs</a>
-    <a href="https://github.com/seanfraserio/forge/blob/main/CONTRIBUTING.md">Contributing</a>
-    <a href="https://enterprise.openforgeai.org">Enterprise</a>
-  </div>
+  <span>MIT License</span>
+  <span class="sep">&middot;</span>
+  <a href="https://github.com/seanfraserio/forge">GitHub</a>
+  <span class="sep">&middot;</span>
+  <a href="https://github.com/seanfraserio/forge/tree/main/docs">Docs</a>
+  <span class="sep">&middot;</span>
+  <a href="https://enterprise.openforgeai.org">Enterprise</a>
 </footer>
 
 </body>
