@@ -95,11 +95,15 @@
   .pain-answer { font-family: var(--mono); font-size: 13px; color: var(--accent); font-weight: 600; background: var(--accent-dim); padding: 6px 12px; border-radius: 6px; display: inline-block; }
 
   /* -- Feature showcase -- */
-  .feature-section { margin-bottom: 56px; }
+  .feature-section { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; margin-bottom: 72px; }
   .feature-section:last-child { margin-bottom: 0; }
-  .feature-section h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
-  .feature-section h3 .feature-badge { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); background: var(--accent-dim); padding: 3px 10px; border-radius: 4px; }
-  .feature-section > p { font-size: 15px; color: var(--text-dim); margin-bottom: 20px; max-width: 720px; line-height: 1.65; }
+  .feature-section:nth-child(even) { direction: rtl; }
+  .feature-section:nth-child(even) > * { direction: ltr; }
+  .feature-text { padding-top: 12px; }
+  .feature-text h3 { font-size: 22px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; }
+  .feature-text h3 .feature-badge { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--accent); background: var(--accent-dim); padding: 3px 10px; border-radius: 4px; }
+  .feature-text > p { font-size: 15px; color: var(--text-dim); line-height: 1.7; }
+  @media (max-width: 768px) { .feature-section { grid-template-columns: 1fr; } .feature-section:nth-child(even) { direction: ltr; } }
 
   /* -- How it works / Steps -- */
   .steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 40px; }
@@ -229,8 +233,10 @@
   <p class="subtitle">Four modules that give your team visibility, control, and compliance.</p>
 
   <div class="feature-section">
-    <h3>Audit Trail <span class="feature-badge">Immutable</span></h3>
-    <p>Immutable, append-only JSONL log at <code>.forge/audit.jsonl</code>. Auto-generated UUIDs and timestamps. Query by action, environment, agent, or any field.</p>
+    <div class="feature-text">
+      <h3>Audit Trail <span class="feature-badge">Immutable</span></h3>
+      <p>Immutable, append-only JSONL log at <code>.forge/audit.jsonl</code>. Auto-generated UUIDs and timestamps. Query by action, environment, agent, or any field.</p>
+    </div>
     <div class="code-block">
       <div class="code-header"><span class="code-filename">audit-example.ts</span><span class="code-lang">typescript</span></div>
       <div class="code-body"><span class="kw">import</span> { <span class="type">AuditTrail</span> } <span class="kw">from</span> <span class="str">"@openforge-ai/enterprise"</span>;
@@ -255,8 +261,10 @@
   </div>
 
   <div class="feature-section">
-    <h3>RBAC <span class="feature-badge">Role-Based</span></h3>
-    <p>Define roles with granular permissions and environment restrictions. Assign users to roles. Check permissions before every deploy. Admin permission bypasses all environment restrictions. Unassigned users fall back to a configurable default role.</p>
+    <div class="feature-text">
+      <h3>RBAC <span class="feature-badge">Role-Based</span></h3>
+      <p>Define roles with granular permissions and environment restrictions. Assign users to roles. Check permissions before every deploy. Admin permission bypasses all environment restrictions. Unassigned users fall back to a configurable default role.</p>
+    </div>
     <div class="code-block">
       <div class="code-header"><span class="code-filename">rbac-example.ts</span><span class="code-lang">typescript</span></div>
       <div class="code-body"><span class="kw">import</span> { <span class="type">RbacManager</span> } <span class="kw">from</span> <span class="str">"@openforge-ai/enterprise"</span>;
@@ -279,8 +287,10 @@
   </div>
 
   <div class="feature-section">
-    <h3>Gated Promotions <span class="feature-badge">Approval Required</span></h3>
-    <p>Require approvals before promoting agents between environments. Define who can approve. Unauthorized approvers are rejected. Track request status from pending through approved.</p>
+    <div class="feature-text">
+      <h3>Gated Promotions <span class="feature-badge">Approval Required</span></h3>
+      <p>Require approvals before promoting agents between environments. Define who can approve. Unauthorized approvers are rejected. Track request status from pending through approved.</p>
+    </div>
     <div class="code-block">
       <div class="code-header"><span class="code-filename">promotion-example.ts</span><span class="code-lang">typescript</span></div>
       <div class="code-body"><span class="kw">import</span> { <span class="type">PromotionManager</span> } <span class="kw">from</span> <span class="str">"@openforge-ai/enterprise"</span>;
@@ -311,8 +321,10 @@
   </div>
 
   <div class="feature-section">
-    <h3>Secrets Management <span class="feature-badge">Zero Hardcoded Keys</span></h3>
-    <p>Resolve secrets from environment variables at deploy time. Never hardcode API keys in forge.yaml or state files. Provider-aware config for future cloud vault integration (Vault, AWS SSM, GCP, Azure).</p>
+    <div class="feature-text">
+      <h3>Secrets Management <span class="feature-badge">Zero Hardcoded Keys</span></h3>
+      <p>Resolve secrets from environment variables at deploy time. Never hardcode API keys in forge.yaml or state files. Provider-aware config for future cloud vault integration (Vault, AWS SSM, GCP, Azure).</p>
+    </div>
     <div class="code-block">
       <div class="code-header"><span class="code-filename">secrets-example.ts</span><span class="code-lang">typescript</span></div>
       <div class="code-body"><span class="kw">import</span> { <span class="type">SecretsManager</span> } <span class="kw">from</span> <span class="str">"@openforge-ai/enterprise"</span>;
