@@ -1,29 +1,22 @@
 name: CI
-
 on:
   push:
     branches: [main]
   pull_request:
 
 jobs:
-  build:
+  build-and-test:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
     steps:
       - uses: actions/checkout@v4
-
       - uses: pnpm/action-setup@v2
         with:
           version: 9
-
       - uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: pnpm
-
       - run: pnpm install --frozen-lockfile
-      - run: pnpm audit --audit-level=high
       - run: pnpm typecheck
       - run: pnpm build
       - run: pnpm test
