@@ -6,3 +6,7 @@ export { OpenAIAdapter } from "./openai.js";
 export type { OpenAIDeployOptions } from "./openai.js";
 export { OllamaAdapter } from "./ollama.js";
 export type { OllamaDeployOptions } from "./ollama.js";
+export { DockerAdapter } from "./docker.js";
+export type { DockerDeployOptions, DockerDeployResult } from "./docker.js";
+export { AgentProviderAdapter } from "./agent-provider.js";
+export type { AgentProviderDeployOptions, AgentProviderDeployResult, AgentDefinition } from "./agent-provider.js";
