@@ -1,3 +1,14 @@
+export {
+  BaseLLMAdapter,
+  catchAsResult,
+} from "./base.js";
+export type {
+  AdapterInterface,
+  RuntimeAdapter,
+  DeployResult,
+  StatusResult,
+  DestroyResult,
+} from "./base.js";
 export { AnthropicAdapter } from "./anthropic.js";
 export type { AnthropicDeployOptions } from "./anthropic.js";
 export { GoogleAdapter } from "./google.js";

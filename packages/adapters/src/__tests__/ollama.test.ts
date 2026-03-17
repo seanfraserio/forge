@@ -25,12 +25,12 @@ describe("OllamaAdapter — construction", () => {
 
   it("computes baseUrl correctly", () => {
     const adapter = new OllamaAdapter({ host: "localhost", port: 11434 });
-    expect(adapter.baseUrl).toBe("http://localhost:11434");
+    expect(adapter["baseUrl"]).toBe("http://localhost:11434");
   });
 
   it("computes baseUrl with custom host and port", () => {
     const adapter = new OllamaAdapter({ host: "ollama.internal", port: 9000 });
-    expect(adapter.baseUrl).toBe("http://ollama.internal:9000");
+    expect(adapter["baseUrl"]).toBe("http://ollama.internal:9000");
   });
 });
 

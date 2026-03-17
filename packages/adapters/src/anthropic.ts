@@ -1,4 +1,5 @@
 import type { ModelConfig } from "@openforge-ai/sdk";
+import { BaseLLMAdapter } from "./base.js";
 
 export interface AnthropicDeployOptions {
   apiKey?: string;
@@ -9,25 +10,17 @@ export interface AnthropicDeployOptions {
  * Adapter for deploying agents to the Anthropic API.
  * Validates model names and translates Forge config to Anthropic SDK params.
  */
-export class AnthropicAdapter {
-  private apiKey: string;
-  private baseUrl: string;
-
+export class AnthropicAdapter extends BaseLLMAdapter {
   constructor(options: AnthropicDeployOptions = {}) {
-    this.apiKey = options.apiKey ?? process.env.ANTHROPIC_API_KEY ?? "";
-    this.baseUrl = options.baseUrl ?? "https://api.anthropic.com";
+    super({
+      apiKey: options.apiKey,
+      baseUrl: options.baseUrl,
+      envVar: "ANTHROPIC_API_KEY",
+      defaultBaseUrl: "https://api.anthropic.com",
+    });
   }
 
   validateModel(model: ModelConfig): boolean {
     return model.name.startsWith("claude-");
-  }
-
-  // TODO: Implement full deployment to Anthropic
-  async deploy(_model: ModelConfig): Promise<{ success: boolean; endpoint?: string }> {
-    if (!this.apiKey) {
-      return { success: false };
-    }
-    // Stub: actual deployment would configure the agent runtime
-    return { success: true, endpoint: this.baseUrl };
   }
 }

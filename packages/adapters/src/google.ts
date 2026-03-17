@@ -1,4 +1,5 @@
 import type { ModelConfig } from "@openforge-ai/sdk";
+import { BaseLLMAdapter, type DeployResult } from "./base.js";
 
 export interface GoogleDeployOptions {
   apiKey?: string;
@@ -10,13 +11,15 @@ export interface GoogleDeployOptions {
  * Adapter for deploying agents to Google Gemini / Vertex AI.
  * Validates model names and translates Forge config to Google AI SDK params.
  */
-export class GoogleAdapter {
-  private apiKey: string;
-  private projectId: string;
-  private location: string;
+export class GoogleAdapter extends BaseLLMAdapter {
+  protected projectId: string;
+  protected location: string;
 
   constructor(options: GoogleDeployOptions = {}) {
-    this.apiKey = options.apiKey ?? process.env.GOOGLE_API_KEY ?? "";
+    super({
+      apiKey: options.apiKey,
+      envVar: "GOOGLE_API_KEY",
+    });
     this.projectId = options.projectId ?? process.env.GOOGLE_CLOUD_PROJECT ?? "";
     this.location = options.location ?? "us-central1";
   }
@@ -25,10 +28,9 @@ export class GoogleAdapter {
     return model.name.startsWith("gemini-");
   }
 
-  // TODO: Implement full deployment to Google Gemini / Vertex AI
-  async deploy(_model: ModelConfig): Promise<{ success: boolean; endpoint?: string }> {
+  async deploy(_model: ModelConfig): Promise<DeployResult> {
     if (!this.apiKey && !this.projectId) {
-      return { success: false };
+      return { success: false, error: "API key or project ID not configured" };
     }
     const endpoint = this.projectId
       ? `https://${this.location}-aiplatform.googleapis.com`

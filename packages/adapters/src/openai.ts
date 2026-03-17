@@ -1,4 +1,5 @@
 import type { ModelConfig } from "@openforge-ai/sdk";
+import { BaseLLMAdapter } from "./base.js";
 
 export interface OpenAIDeployOptions {
   apiKey?: string;
@@ -8,24 +9,17 @@ export interface OpenAIDeployOptions {
 /**
  * Adapter for deploying agents to the OpenAI API.
  */
-export class OpenAIAdapter {
-  private apiKey: string;
-  private baseUrl: string;
-
+export class OpenAIAdapter extends BaseLLMAdapter {
   constructor(options: OpenAIDeployOptions = {}) {
-    this.apiKey = options.apiKey ?? process.env.OPENAI_API_KEY ?? "";
-    this.baseUrl = options.baseUrl ?? "https://api.openai.com";
+    super({
+      apiKey: options.apiKey,
+      baseUrl: options.baseUrl,
+      envVar: "OPENAI_API_KEY",
+      defaultBaseUrl: "https://api.openai.com",
+    });
   }
 
   validateModel(model: ModelConfig): boolean {
     return model.name.startsWith("gpt-") || /^o\d/.test(model.name);
-  }
-
-  // TODO: Implement full deployment to OpenAI
-  async deploy(_model: ModelConfig): Promise<{ success: boolean; endpoint?: string }> {
-    if (!this.apiKey) {
-      return { success: false };
-    }
-    return { success: true, endpoint: this.baseUrl };
   }
 }

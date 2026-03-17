@@ -93,9 +93,10 @@ describe("DockerAdapter — deploy", () => {
     const result = await adapter.deploy(anthropicModel, { name: "test-agent", port: 8080 });
 
     expect(result.success).toBe(true);
-    expect(result.containerId).toBe("abc123def456");
+    expect((result.metadata as Record<string, unknown>).containerId).toBe("abc123def456");
     expect(result.endpoint).toBe("http://localhost:8080");
-    expect(result.imageTag).toBe("test-agent:" + result.imageTag!.split(":")[1]);
+    const imageTag = (result.metadata as Record<string, unknown>).imageTag as string;
+    expect(imageTag).toBe("test-agent:" + imageTag.split(":")[1]);
   });
 
   it("returns error when docker build fails", async () => {
@@ -135,7 +136,7 @@ describe("DockerAdapter — deploy", () => {
     const result = await adapter.deploy(anthropicModel, { name: "my-agent" });
 
     expect(result.success).toBe(true);
-    expect(result.imageTag).toContain("my-registry.com/repo/");
+    expect((result.metadata as Record<string, unknown>).imageTag).toContain("my-registry.com/repo/");
   });
 
   it("returns error when docker push fails", async () => {
@@ -314,7 +315,7 @@ describe("DockerAdapter — destroy", () => {
 });
 
 describe("DockerAdapter — status", () => {
-  it("returns running status for an active container", async () => {
+  it("returns active status for a running container", async () => {
     mockExecAsync.mockResolvedValueOnce({
       stdout: "true abc123def456ghij 2025-01-01T00:00:00Z",
       stderr: "",
@@ -323,22 +324,23 @@ describe("DockerAdapter — status", () => {
     const adapter = new DockerAdapter();
     const result = await adapter.status("my-agent");
 
-    expect(result.running).toBe(true);
-    expect(result.containerId).toBe("abc123def456");
-    expect(result.uptime).toBe("2025-01-01T00:00:00Z");
+    expect(result.active).toBe(true);
+    expect(result.status).toBe("running");
+    expect((result.metadata as Record<string, unknown>).containerId).toBe("abc123def456");
+    expect((result.metadata as Record<string, unknown>).uptime).toBe("2025-01-01T00:00:00Z");
   });
 
-  it("returns running: false when container does not exist", async () => {
+  it("returns active: false when container does not exist", async () => {
     mockExecAsync.mockRejectedValueOnce(new Error("No such container"));
 
     const adapter = new DockerAdapter();
     const result = await adapter.status("nonexistent");
 
-    expect(result.running).toBe(false);
-    expect(result.containerId).toBeUndefined();
+    expect(result.active).toBe(false);
+    expect(result.status).toBe("not_found");
   });
 
-  it("returns running: false for a stopped container", async () => {
+  it("returns active: false for a stopped container", async () => {
     mockExecAsync.mockResolvedValueOnce({
       stdout: "false abc123def456ghij 2025-01-01T00:00:00Z",
       stderr: "",
@@ -347,7 +349,8 @@ describe("DockerAdapter — status", () => {
     const adapter = new DockerAdapter();
     const result = await adapter.status("stopped-agent");
 
-    expect(result.running).toBe(false);
+    expect(result.active).toBe(false);
+    expect(result.status).toBe("stopped");
   });
 });
 

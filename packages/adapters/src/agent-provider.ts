@@ -1,4 +1,5 @@
 import type { ModelConfig } from "@openforge-ai/sdk";
+import type { RuntimeAdapter, DeployResult, DestroyResult, StatusResult } from "./base.js";
 
 export interface AgentProviderDeployOptions {
   // The hosted agent platform's API endpoint
@@ -36,15 +37,8 @@ export interface AgentDefinition {
   metadata?: Record<string, unknown>;
 }
 
-export interface AgentProviderDeployResult {
-  success: boolean;
-  agentId?: string;
-  endpoint?: string;
-  version?: string;
-  status?: string;
-  error?: string;
-  metadata?: Record<string, unknown>;
-}
+/** @deprecated Use DeployResult from ./base.js instead */
+export type AgentProviderDeployResult = DeployResult;
 
 /**
  * Generic adapter for any hosted agent platform.
@@ -58,7 +52,7 @@ export interface AgentProviderDeployResult {
  * Platforms that don't follow this exact pattern can extend this class
  * and override the relevant methods.
  */
-export class AgentProviderAdapter {
+export class AgentProviderAdapter implements RuntimeAdapter {
   private endpoint: string;
   private apiKey: string;
   private platformName: string;
@@ -88,7 +82,7 @@ export class AgentProviderAdapter {
     return true;
   }
 
-  async deploy(model: ModelConfig, agent?: AgentDefinition): Promise<AgentProviderDeployResult> {
+  async deploy(model: ModelConfig, agent?: AgentDefinition): Promise<DeployResult> {
     if (!this.apiKey) {
       return {
         success: false,
@@ -136,7 +130,7 @@ export class AgentProviderAdapter {
   }
 
   // Update an existing agent
-  async update(agentId: string, agent: Partial<AgentDefinition>): Promise<AgentProviderDeployResult> {
+  async update(agentId: string, agent: Partial<AgentDefinition>): Promise<DeployResult> {
     if (!this.apiKey) {
       return { success: false, error: "API key not configured" };
     }
@@ -169,7 +163,7 @@ export class AgentProviderAdapter {
   }
 
   // Get agent status
-  async status(agentId: string): Promise<{ active: boolean; status?: string; error?: string; metadata?: Record<string, unknown> }> {
+  async status(agentId: string): Promise<StatusResult> {
     if (!this.apiKey) {
       return { active: false, error: "API key not configured" };
     }
@@ -198,7 +192,7 @@ export class AgentProviderAdapter {
   }
 
   // Delete/destroy an agent
-  async destroy(agentId: string): Promise<{ success: boolean; error?: string }> {
+  async destroy(agentId: string): Promise<DestroyResult> {
     if (!this.apiKey) {
       return { success: false, error: "API key not configured" };
     }

@@ -1,4 +1,5 @@
 import type { ModelConfig } from "@openforge-ai/sdk";
+import { BaseLLMAdapter, type DeployResult } from "./base.js";
 
 export interface OllamaDeployOptions {
   host?: string;
@@ -8,17 +9,16 @@ export interface OllamaDeployOptions {
 /**
  * Adapter for deploying agents to a local Ollama instance.
  */
-export class OllamaAdapter {
-  private host: string;
-  private port: number;
+export class OllamaAdapter extends BaseLLMAdapter {
+  protected host: string;
+  protected port: number;
 
   constructor(options: OllamaDeployOptions = {}) {
-    this.host = options.host ?? "localhost";
-    this.port = options.port ?? 11434;
-  }
-
-  get baseUrl(): string {
-    return `http://${this.host}:${this.port}`;
+    const host = options.host ?? "localhost";
+    const port = options.port ?? 11434;
+    super({ baseUrl: `http://${host}:${port}` });
+    this.host = host;
+    this.port = port;
   }
 
   validateModel(_model: ModelConfig): boolean {
@@ -26,8 +26,7 @@ export class OllamaAdapter {
     return true;
   }
 
-  // TODO: Implement full deployment to Ollama
-  async deploy(_model: ModelConfig): Promise<{ success: boolean; endpoint?: string }> {
+  async deploy(_model: ModelConfig): Promise<DeployResult> {
     return { success: true, endpoint: this.baseUrl };
   }
 }
