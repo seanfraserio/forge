@@ -6,5 +6,10 @@ dist/
 *.log
 .DS_Store
 
-# Enterprise packages live in a separate private repo
+# Enterprise (private repos)
 packages/enterprise/
+site/
+docs/enterprise.md
+docs/enterprise-integration-guide.md
+docs/superpowers/
+.superpowers/
