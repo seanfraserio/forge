@@ -1946,3 +1946,309 @@ function resolveEnvironment(config: ForgeConfig, env: string): ForgeConfig
 ```
 
 Applies environment overrides to a base config. `model` fields are shallow-merged. `tools` and `memory` are fully replaced. Returns the base config unchanged if the specified environment doesn't exist in `config.environments`.
+
+---
+
+### `DockerAdapter`
+
+Adapter for deploying agents as Docker containers. Generates a Dockerfile, builds an image, and runs a container with an HTTP endpoint.
+
+Package: `@openforge-ai/adapters`
+
+#### `DockerDeployOptions`
+
+```typescript
+interface DockerDeployOptions {
+  registry?: string;
+  runtime?: string;
+  push?: boolean;
+  network?: string;
+  envVars?: Record<string, string>;
+}
+```
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `registry` | `string` | No | `""` | Docker registry URL. If empty, images are built locally only. |
+| `runtime` | `string` | No | `"node:20-alpine"` | Base Docker image for the container. |
+| `push` | `boolean` | No | `false` | Push built image to the registry. Requires `registry`. |
+| `network` | `string` | No | -- | Docker network to attach the container to. |
+| `envVars` | `Record<string, string>` | No | `{}` | Environment variables injected into the container at runtime. |
+
+#### `DockerDeployResult`
+
+```typescript
+interface DockerDeployResult {
+  success: boolean;
+  endpoint?: string;
+  containerId?: string;
+  imageTag?: string;
+  error?: string;
+}
+```
+
+| Field | Type | Present | Description |
+|-------|------|---------|-------------|
+| `success` | `boolean` | Always | Whether the deployment succeeded. |
+| `endpoint` | `string` | On success | URL of the running agent (e.g., `http://localhost:3000`). |
+| `containerId` | `string` | On success | First 12 characters of the Docker container ID. |
+| `imageTag` | `string` | On success | Full image reference including registry and tag. |
+| `error` | `string` | On failure | Error message. |
+
+#### DockerAdapter Constructor
+
+```typescript
+constructor(options?: DockerDeployOptions)
+```
+
+```typescript
+const adapter = new DockerAdapter({
+  registry: "us-central1-docker.pkg.dev/project/repo",
+  push: true,
+  envVars: { ANTHROPIC_BASE_URL: "http://bastion:4000" },
+});
+```
+
+#### DockerAdapter Methods
+
+---
+
+##### `validateModel(model)`
+
+```typescript
+validateModel(model: ModelConfig): boolean
+```
+
+Always returns `true`. Docker can run any model; validation is provider-dependent, not Docker-dependent.
+
+---
+
+##### `deploy(model, agentConfig?)`
+
+```typescript
+async deploy(model: ModelConfig, agentConfig?: {
+  name?: string;
+  systemPrompt?: string;
+  port?: number;
+}): Promise<DockerDeployResult>
+```
+
+Generates a build context (Dockerfile, runner script, package.json), builds the Docker image, optionally pushes to the registry, stops any existing container with the same name, and starts a new container.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `model` | `ModelConfig` | -- | Model configuration passed to the generated runner script. |
+| `agentConfig.name` | `string` | `"forge-agent"` | Container and image name. |
+| `agentConfig.systemPrompt` | `string` | -- | System prompt written to `system-prompt.txt` in the container. |
+| `agentConfig.port` | `number` | `3000` | Port for the HTTP server. |
+
+**Build timeout:** 300,000 ms (5 minutes). **Push timeout:** 120,000 ms (2 minutes). **Run timeout:** 30,000 ms.
+
+---
+
+##### `destroy(agentName)`
+
+```typescript
+async destroy(agentName: string): Promise<{ success: boolean; error?: string }>
+```
+
+Stops and removes the Docker container with the given name. Returns `{ success: false, error }` if the container does not exist or cannot be stopped.
+
+---
+
+##### `status(agentName)`
+
+```typescript
+async status(agentName: string): Promise<{ running: boolean; containerId?: string; uptime?: string }>
+```
+
+Inspects the Docker container. Returns `running: true` with the container ID (first 12 chars) and the `StartedAt` timestamp if the container is running. Returns `{ running: false }` if the container does not exist.
+
+---
+
+##### `logs(agentName, tail?)`
+
+```typescript
+async logs(agentName: string, tail?: number): Promise<string>
+```
+
+Returns the last `tail` lines (default: 50) of container logs. Returns an empty string if the container does not exist.
+
+---
+
+### `AgentProviderAdapter`
+
+Generic adapter for any hosted agent platform that follows a standard REST API pattern. Communicates via:
+
+- `POST /agents` -- create agent
+- `GET /agents/:id` -- get agent status
+- `PUT /agents/:id` -- update agent
+- `DELETE /agents/:id` -- delete agent
+- `POST /agents/:id/run` -- invoke agent
+
+Platforms that do not follow this exact pattern can extend this class and override the relevant methods.
+
+Package: `@openforge-ai/adapters`
+
+#### `AgentProviderDeployOptions`
+
+```typescript
+interface AgentProviderDeployOptions {
+  endpoint: string;
+  apiKey?: string;
+  authHeader?: string;
+  authScheme?: string;
+  platformName?: string;
+  headers?: Record<string, string>;
+  timeoutMs?: number;
+}
+```
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `endpoint` | `string` | Yes | -- | The hosted agent platform's API base URL. Trailing slashes are stripped. |
+| `apiKey` | `string` | No | `process.env.AGENT_PROVIDER_API_KEY` or `""` | API key for authentication. |
+| `authHeader` | `string` | No | `"Authorization"` | HTTP header name used for authentication. |
+| `authScheme` | `string` | No | `"Bearer"` | Authentication scheme prepended to the API key. |
+| `platformName` | `string` | No | `"Agent Provider"` | Human-readable platform name used in error messages. |
+| `headers` | `Record<string, string>` | No | `{}` | Additional HTTP headers sent with every request. |
+| `timeoutMs` | `number` | No | `30000` | Timeout in milliseconds for API calls. Uses `AbortSignal.timeout()`. |
+
+#### `AgentDefinition`
+
+```typescript
+interface AgentDefinition {
+  name: string;
+  description?: string;
+  model: ModelConfig;
+  systemPrompt?: string;
+  tools?: Array<{
+    name: string;
+    description?: string;
+    inputSchema?: unknown;
+  }>;
+  memory?: {
+    type: string;
+    config?: Record<string, unknown>;
+  };
+  metadata?: Record<string, unknown>;
+}
+```
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `name` | `string` | Yes | Agent name. |
+| `description` | `string` | No | Human-readable description. |
+| `model` | `ModelConfig` | Yes | Model configuration. |
+| `systemPrompt` | `string` | No | System prompt text. |
+| `tools` | `Array<{ name, description?, inputSchema? }>` | No | Tool definitions. |
+| `memory` | `{ type, config? }` | No | Memory configuration. |
+| `metadata` | `Record<string, unknown>` | No | Arbitrary metadata passed to the platform. |
+
+#### `AgentProviderDeployResult`
+
+```typescript
+interface AgentProviderDeployResult {
+  success: boolean;
+  agentId?: string;
+  endpoint?: string;
+  version?: string;
+  status?: string;
+  error?: string;
+  metadata?: Record<string, unknown>;
+}
+```
+
+| Field | Type | Present | Description |
+|-------|------|---------|-------------|
+| `success` | `boolean` | Always | Whether the operation succeeded. |
+| `agentId` | `string` | On success | Agent ID returned by the platform (from `id` or `agent_id` in response). |
+| `endpoint` | `string` | On success | Agent endpoint URL. |
+| `version` | `string` | On success | Agent version string from the platform. |
+| `status` | `string` | On success | Agent status (defaults to `"active"`). |
+| `error` | `string` | On failure | Error message including HTTP status and platform name. |
+| `metadata` | `Record<string, unknown>` | On success | Full response body from the platform. |
+
+#### AgentProviderAdapter Constructor
+
+```typescript
+constructor(options: AgentProviderDeployOptions)
+```
+
+**Throws:** `Error` if `options.endpoint` is not provided.
+
+```typescript
+const adapter = new AgentProviderAdapter({
+  endpoint: "https://api.openclaw.dev",
+  apiKey: "sk-...",
+  platformName: "OpenClaw",
+});
+```
+
+#### AgentProviderAdapter Methods
+
+---
+
+##### `validateModel(model)`
+
+```typescript
+validateModel(model: ModelConfig): boolean
+```
+
+Always returns `true`. Hosted agent platforms accept any model they support; validation happens server-side.
+
+---
+
+##### `deploy(model, agent?)`
+
+```typescript
+async deploy(model: ModelConfig, agent?: AgentDefinition): Promise<AgentProviderDeployResult>
+```
+
+Creates an agent on the hosted platform via `POST /agents`. If `agent` is not provided, a default `AgentDefinition` is constructed with `name: "forge-agent"` and the given model.
+
+Returns `{ success: false, error }` if no API key is configured.
+
+---
+
+##### `update(agentId, agent)`
+
+```typescript
+async update(agentId: string, agent: Partial<AgentDefinition>): Promise<AgentProviderDeployResult>
+```
+
+Updates an existing agent via `PUT /agents/:id`. Accepts a partial agent definition. Only the provided fields are sent to the platform.
+
+---
+
+##### `status(agentId)`
+
+```typescript
+async status(agentId: string): Promise<{ active: boolean; status?: string; error?: string; metadata?: Record<string, unknown> }>
+```
+
+Retrieves agent status via `GET /agents/:id`. Returns `active: true` if the platform reports status `"active"` or `"running"`.
+
+---
+
+##### `destroy(agentId)`
+
+```typescript
+async destroy(agentId: string): Promise<{ success: boolean; error?: string }>
+```
+
+Deletes an agent via `DELETE /agents/:id`.
+
+---
+
+##### `invoke(agentId, messages)`
+
+```typescript
+async invoke(agentId: string, messages: Array<{ role: string; content: string }>): Promise<{
+  success: boolean;
+  response?: unknown;
+  error?: string;
+}>
+```
+
+Sends messages to an agent via `POST /agents/:id/run`. The request body is `{ messages }`. The response body is returned as `response`.
