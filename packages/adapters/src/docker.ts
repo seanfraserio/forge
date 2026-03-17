@@ -4,6 +4,7 @@ import { writeFile, mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { promisify } from "node:util";
+import type { RuntimeAdapter, DeployResult, DestroyResult, StatusResult } from "./base.js";
 
 const execAsync = promisify(exec);
 
@@ -15,19 +16,14 @@ export interface DockerDeployOptions {
   envVars?: Record<string, string>;
 }
 
-export interface DockerDeployResult {
-  success: boolean;
-  endpoint?: string;
-  containerId?: string;
-  imageTag?: string;
-  error?: string;
-}
+/** @deprecated Use DeployResult from ./base.js instead */
+export type DockerDeployResult = DeployResult;
 
 /**
  * Adapter for deploying agents as Docker containers.
  * Generates a Dockerfile, builds an image, and runs a container.
  */
-export class DockerAdapter {
+export class DockerAdapter implements RuntimeAdapter {
   private registry: string;
   private runtime: string;
   private push: boolean;
@@ -51,7 +47,7 @@ export class DockerAdapter {
     name?: string;
     systemPrompt?: string;
     port?: number;
-  }): Promise<DockerDeployResult> {
+  }): Promise<DeployResult> {
     const agentName = agentConfig?.name ?? "forge-agent";
     const port = agentConfig?.port ?? 3000;
     const tag = `${agentName}:${Date.now()}`;
@@ -125,9 +121,11 @@ export class DockerAdapter {
 
         return {
           success: true,
-          containerId: result.stdout.trim().substring(0, 12),
-          imageTag: imageRef,
           endpoint: `http://localhost:${port}`,
+          metadata: {
+            containerId: result.stdout.trim().substring(0, 12),
+            imageTag: imageRef,
+          },
         };
       } catch (err) {
         return { success: false, error: `Docker run failed: ${(err as Error).message}` };
@@ -139,7 +137,7 @@ export class DockerAdapter {
   }
 
   // Stop and remove a deployed container
-  async destroy(agentName: string): Promise<{ success: boolean; error?: string }> {
+  async destroy(agentName: string): Promise<DestroyResult> {
     try {
       await execAsync(`docker rm -f ${agentName}`);
       return { success: true };
@@ -149,15 +147,22 @@ export class DockerAdapter {
   }
 
   // Check if a container is running
-  async status(agentName: string): Promise<{ running: boolean; containerId?: string; uptime?: string }> {
+  async status(agentName: string): Promise<StatusResult> {
     try {
       const result = await execAsync(
         `docker inspect --format='{{.State.Running}} {{.Id}} {{.State.StartedAt}}' ${agentName}`,
       );
       const [running, id, startedAt] = result.stdout.trim().split(" ");
-      return { running: running === "true", containerId: id?.substring(0, 12), uptime: startedAt };
+      return {
+        active: running === "true",
+        status: running === "true" ? "running" : "stopped",
+        metadata: {
+          containerId: id?.substring(0, 12),
+          uptime: startedAt,
+        },
+      };
     } catch {
-      return { running: false };
+      return { active: false, status: "not_found" };
     }
   }
 
