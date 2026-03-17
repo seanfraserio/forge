@@ -50,8 +50,7 @@ describe("AgentProviderAdapter — construction", () => {
       endpoint: "https://api.example.com",
       apiKey: "key",
     });
-    expect(adapter["authHeader"]).toBe("Authorization");
-    expect(adapter["authScheme"]).toBe("Bearer");
+    expect(adapter["headers"]["Authorization"]).toBe("Bearer key");
   });
 
   it("uses custom auth header and scheme", () => {
@@ -61,8 +60,8 @@ describe("AgentProviderAdapter — construction", () => {
       authHeader: "x-api-key",
       authScheme: "ApiKey",
     });
-    expect(adapter["authHeader"]).toBe("x-api-key");
-    expect(adapter["authScheme"]).toBe("ApiKey");
+    expect(adapter["headers"]["x-api-key"]).toBe("ApiKey key");
+    expect(adapter["headers"]["Authorization"]).toBeUndefined();
   });
 
   it("uses default platform name", () => {
@@ -362,11 +361,23 @@ describe("AgentProviderAdapter — status", () => {
     expect(result.active).toBe(false);
     expect(result.error).toContain("HTTP 404");
   });
+
+  it("returns error when no API key", async () => {
+    vi.stubEnv("AGENT_PROVIDER_API_KEY", "");
+    const adapter = new AgentProviderAdapter({
+      endpoint: "https://api.example.com",
+      apiKey: "",
+    });
+    const result = await adapter.status("agent-42");
+
+    expect(result.active).toBe(false);
+    expect(result.error).toContain("API key not configured");
+  });
 });
 
 describe("AgentProviderAdapter — destroy", () => {
   it("sends DELETE to /agents/:id", async () => {
-    mockFetch.mockResolvedValueOnce({ ok: true });
+    mockFetch.mockResolvedValueOnce({ ok: true, text: async () => "" });
 
     const adapter = new AgentProviderAdapter({
       endpoint: "https://api.example.com",
@@ -381,7 +392,7 @@ describe("AgentProviderAdapter — destroy", () => {
   });
 
   it("returns error on failure", async () => {
-    mockFetch.mockResolvedValueOnce({ ok: false, status: 500 });
+    mockFetch.mockResolvedValueOnce({ ok: false, status: 500, text: async () => "" });
 
     const adapter = new AgentProviderAdapter({
       endpoint: "https://api.example.com",
@@ -391,6 +402,18 @@ describe("AgentProviderAdapter — destroy", () => {
 
     expect(result.success).toBe(false);
     expect(result.error).toContain("HTTP 500");
+  });
+
+  it("returns error when no API key", async () => {
+    vi.stubEnv("AGENT_PROVIDER_API_KEY", "");
+    const adapter = new AgentProviderAdapter({
+      endpoint: "https://api.example.com",
+      apiKey: "",
+    });
+    const result = await adapter.destroy("agent-42");
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("API key not configured");
   });
 });
 
@@ -445,5 +468,17 @@ describe("AgentProviderAdapter — invoke", () => {
 
     expect(result.success).toBe(false);
     expect(result.error).toContain("Connection timeout");
+  });
+
+  it("returns error when no API key", async () => {
+    vi.stubEnv("AGENT_PROVIDER_API_KEY", "");
+    const adapter = new AgentProviderAdapter({
+      endpoint: "https://api.example.com",
+      apiKey: "",
+    });
+    const result = await adapter.invoke("agent-42", [{ role: "user", content: "Hi" }]);
+
+    expect(result.success).toBe(false);
+    expect(result.error).toContain("API key not configured");
   });
 });

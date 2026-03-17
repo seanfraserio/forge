@@ -61,8 +61,6 @@ export interface AgentProviderDeployResult {
 export class AgentProviderAdapter {
   private endpoint: string;
   private apiKey: string;
-  private authHeader: string;
-  private authScheme: string;
   private platformName: string;
   private headers: Record<string, string>;
   private timeoutMs: number;
@@ -73,10 +71,14 @@ export class AgentProviderAdapter {
     }
     this.endpoint = options.endpoint.replace(/\/$/, "");
     this.apiKey = options.apiKey ?? process.env.AGENT_PROVIDER_API_KEY ?? "";
-    this.authHeader = options.authHeader ?? "Authorization";
-    this.authScheme = options.authScheme ?? "Bearer";
+    const authHeader = options.authHeader ?? "Authorization";
+    const authScheme = options.authScheme ?? "Bearer";
     this.platformName = options.platformName ?? "Agent Provider";
-    this.headers = options.headers ?? {};
+    this.headers = {
+      "Content-Type": "application/json",
+      [authHeader]: `${authScheme} ${this.apiKey}`,
+      ...(options.headers ?? {}),
+    };
     this.timeoutMs = options.timeoutMs ?? 30000;
   }
 
@@ -102,7 +104,7 @@ export class AgentProviderAdapter {
     try {
       const response = await fetch(`${this.endpoint}/agents`, {
         method: "POST",
-        headers: this.buildHeaders(),
+        headers: this.headers,
         body: JSON.stringify(body),
         signal: AbortSignal.timeout(this.timeoutMs),
       });
@@ -142,7 +144,7 @@ export class AgentProviderAdapter {
     try {
       const response = await fetch(`${this.endpoint}/agents/${agentId}`, {
         method: "PUT",
-        headers: this.buildHeaders(),
+        headers: this.headers,
         body: JSON.stringify(agent),
         signal: AbortSignal.timeout(this.timeoutMs),
       });
@@ -168,10 +170,14 @@ export class AgentProviderAdapter {
 
   // Get agent status
   async status(agentId: string): Promise<{ active: boolean; status?: string; error?: string; metadata?: Record<string, unknown> }> {
+    if (!this.apiKey) {
+      return { active: false, error: "API key not configured" };
+    }
+
     try {
       const response = await fetch(`${this.endpoint}/agents/${agentId}`, {
         method: "GET",
-        headers: this.buildHeaders(),
+        headers: this.headers,
         signal: AbortSignal.timeout(this.timeoutMs),
       });
 
@@ -193,12 +199,19 @@ export class AgentProviderAdapter {
 
   // Delete/destroy an agent
   async destroy(agentId: string): Promise<{ success: boolean; error?: string }> {
+    if (!this.apiKey) {
+      return { success: false, error: "API key not configured" };
+    }
+
     try {
       const response = await fetch(`${this.endpoint}/agents/${agentId}`, {
         method: "DELETE",
-        headers: this.buildHeaders(),
+        headers: this.headers,
         signal: AbortSignal.timeout(this.timeoutMs),
       });
+
+      // Drain the response body to release the connection
+      await response.text();
 
       return { success: response.ok, error: response.ok ? undefined : `HTTP ${response.status}` };
     } catch (err) {
@@ -212,10 +225,14 @@ export class AgentProviderAdapter {
     response?: unknown;
     error?: string;
   }> {
+    if (!this.apiKey) {
+      return { success: false, error: "API key not configured" };
+    }
+
     try {
       const response = await fetch(`${this.endpoint}/agents/${agentId}/run`, {
         method: "POST",
-        headers: this.buildHeaders(),
+        headers: this.headers,
         body: JSON.stringify({ messages }),
         signal: AbortSignal.timeout(this.timeoutMs),
       });
@@ -230,13 +247,5 @@ export class AgentProviderAdapter {
     } catch (err) {
       return { success: false, error: (err as Error).message };
     }
-  }
-
-  private buildHeaders(): Record<string, string> {
-    return {
-      "Content-Type": "application/json",
-      [this.authHeader]: `${this.authScheme} ${this.apiKey}`,
-      ...this.headers,
-    };
   }
 }
