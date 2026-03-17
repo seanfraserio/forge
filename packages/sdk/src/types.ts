@@ -73,6 +73,8 @@ export interface AgentState {
   environment: string;
   agentName: string;
   agentVersion?: string;
+  endpoint?: string;
+  agentId?: string;
   config: ForgeConfig;
 }
 

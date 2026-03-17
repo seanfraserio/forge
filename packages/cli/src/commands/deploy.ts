@@ -81,9 +81,12 @@ export async function deployCommand(opts: DeployCommandOptions): Promise<void> {
   const result = await apply(planResult, config, applyOpts);
 
   if (result.success) {
-    console.log(chalk.green(`\n✓ Successfully deployed "${config.agent.name}" to ${opts.env}`));
-    console.log(chalk.dim(`  State written to .forge/state.json`));
+    console.log(chalk.green(`\n✓ Agent "${config.agent.name}" deployed to ${opts.env}`));
+    if (result.state.endpoint) {
+      console.log(chalk.dim(`  Endpoint: ${result.state.endpoint}`));
+    }
     console.log(chalk.dim(`  Config hash: ${result.state.configHash.slice(0, 12)}...`));
+    console.log(chalk.dim(`  State written to .forge/state.json`));
   } else {
     console.error(chalk.red(`\n✗ Deploy failed: ${result.error}`));
     process.exit(1);

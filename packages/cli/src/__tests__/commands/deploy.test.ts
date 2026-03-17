@@ -1,8 +1,19 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { plan } from "../../engine/planner.js";
 import { createState, hashConfig, writeState, readState } from "../../engine/state.js";
 import { apply } from "../../engine/applier.js";
 import type { ForgeConfig } from "@openforge-ai/sdk";
+
+// Mock the adapter resolver so tests don't require real API keys
+vi.mock("../../engine/adapter-resolver.js", () => ({
+  resolveAdapter: () => ({
+    validateModel: () => true,
+    deploy: async () => ({
+      success: true,
+      endpoint: "https://api.anthropic.com",
+    }),
+  }),
+}));
 
 const baseConfig: ForgeConfig = {
   version: "1",
@@ -117,5 +128,18 @@ describe("deploy — apply", () => {
 
     const state2 = await readState(tmpDir);
     expect(state2!.configHash).toBe(hash1);
+  });
+
+  it("includes endpoint from adapter in state", async () => {
+    const tmpDir = `/tmp/forge-endpoint-test-${Date.now()}`;
+    const planResult = plan(baseConfig, null);
+    const result = await apply(planResult, baseConfig, {
+      dryRun: false,
+      environment: "dev",
+      autoApprove: true,
+      stateDir: tmpDir,
+    });
+    expect(result.success).toBe(true);
+    expect(result.state.endpoint).toBe("https://api.anthropic.com");
   });
 });
