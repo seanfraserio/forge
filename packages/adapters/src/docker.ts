@@ -37,7 +37,6 @@ export interface DockerDeployOptions {
   envVars?: Record<string, string>;
 }
 
-
 /**
  * Adapter for deploying agents as Docker containers.
  * Generates a Dockerfile, builds an image, and runs a container.

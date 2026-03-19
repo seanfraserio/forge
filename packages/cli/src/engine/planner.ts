@@ -1,4 +1,4 @@
-import type { ForgeConfig, AgentState, PlanResult, PlanItem } from "@openforge-ai/sdk";
+import type { ForgeConfig, AgentState, PlanResult } from "@openforge-ai/sdk";
 import { hashConfig } from "./state.js";
 
 /**

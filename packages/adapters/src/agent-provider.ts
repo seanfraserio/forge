@@ -37,7 +37,6 @@ export interface AgentDefinition {
   metadata?: Record<string, unknown>;
 }
 
-
 /**
  * Generic adapter for any hosted agent platform.
  * Communicates via a standard REST API pattern:
