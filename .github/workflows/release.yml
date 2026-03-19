@@ -27,21 +27,17 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
-          registry-url: "https://registry.npmjs.org"
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=high
       - run: pnpm build
       - run: pnpm test
 
-      # Debug: check npmrc and auth state
-      - name: Debug npm auth
-        run: |
-          cat $NPM_CONFIG_USERCONFIG 2>/dev/null || echo "No userconfig"
-          cat ~/.npmrc 2>/dev/null || echo "No ~/.npmrc"
-          npm whoami 2>&1 || echo "Not authenticated"
+      # Configure npm for OIDC trusted publishing (no token needed)
+      - name: Configure npm registry
+        run: npm config set registry https://registry.npmjs.org/
 
-      # Publish each package using npm (not pnpm) for OIDC trusted publishing support
+      # Publish each package in dependency order
       - name: Publish SDK
         run: cd packages/sdk && npm publish --access public --provenance
       - name: Publish Adapters
