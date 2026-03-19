@@ -27,17 +27,16 @@ jobs:
         with:
           node-version: 20
           cache: pnpm
+          registry-url: "https://registry.npmjs.org"
 
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=high
       - run: pnpm build
       - run: pnpm test
 
-      # Configure npm for OIDC trusted publishing (no token needed)
-      - name: Configure npm registry
-        run: npm config set registry https://registry.npmjs.org/
-
-      # Publish each package in dependency order
+      # Publish with provenance via OIDC trusted publishing
+      # setup-node writes .npmrc with ${NODE_AUTH_TOKEN} placeholder
+      # npm publish --provenance exchanges OIDC token for npm auth automatically
       - name: Publish SDK
         run: cd packages/sdk && npm publish --access public --provenance
       - name: Publish Adapters
