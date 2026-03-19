@@ -33,7 +33,14 @@ jobs:
       - run: pnpm audit --audit-level=high
       - run: pnpm build
       - run: pnpm test
-      - run: pnpm -r publish --access public --no-git-checks --provenance
+
+      # Publish each package using npm (not pnpm) for OIDC trusted publishing support
+      - name: Publish SDK
+        run: cd packages/sdk && npm publish --access public --provenance
+      - name: Publish Adapters
+        run: cd packages/adapters && npm publish --access public --provenance
+      - name: Publish CLI
+        run: cd packages/cli && npm publish --access public --provenance
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
