@@ -38,12 +38,9 @@ jobs:
       # setup-node writes .npmrc with ${NODE_AUTH_TOKEN} placeholder
       # npm publish --provenance exchanges OIDC token for npm auth automatically
       - name: Publish SDK
-        run: cd packages/sdk && npm publish --access public --provenance
-      - name: Publish Adapters
-        run: cd packages/adapters && npm publish --access public --provenance
-      - name: Publish CLI
-        run: cd packages/cli && npm publish --access public --provenance
-
+        run: cd packages/sdk && npm publish --access public       - name: Publish Adapters
+        run: cd packages/adapters && npm publish --access public       - name: Publish CLI
+        run: cd packages/cli && npm publish --access public 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
