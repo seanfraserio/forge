@@ -1,6 +1,6 @@
 import { readFile, writeFile, mkdir, stat } from "node:fs/promises";
 import { createHash } from "node:crypto";
-import { join, resolve } from "node:path";
+import { join } from "node:path";
 import { z } from "zod";
 import type { AgentState, ForgeConfig } from "@openforge-ai/sdk";
 
@@ -27,7 +27,6 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
  * Rejects paths containing '..' segments to prevent writing outside the intended directory.
  */
 function validateStateDir(stateDir: string): void {
-  const normalized = resolve(stateDir);
   if (stateDir.includes("..")) {
     throw new Error(`stateDir must not contain path traversal ('..').  Got: ${stateDir}`);
   }
@@ -77,7 +76,9 @@ export async function readState(stateDir: string): Promise<AgentState | null> {
       console.warn("Warning: State file has invalid structure. Treating as no prior state.");
       return null;
     }
-    return validated.data as AgentState;
+    // Cast through unknown: Zod validates the envelope structure,
+    // but the nested config object is opaque at the state-validation level
+    return validated.data as unknown as AgentState;
   } catch (err: unknown) {
     if (err instanceof Error && "code" in err && (err as NodeJS.ErrnoException).code === "ENOENT") {
       return null;

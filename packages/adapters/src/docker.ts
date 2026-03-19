@@ -37,8 +37,6 @@ export interface DockerDeployOptions {
   envVars?: Record<string, string>;
 }
 
-/** @deprecated Use DeployResult from ./base.js instead */
-export type DockerDeployResult = DeployResult;
 
 /**
  * Adapter for deploying agents as Docker containers.

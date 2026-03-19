@@ -37,8 +37,6 @@ export interface AgentDefinition {
   metadata?: Record<string, unknown>;
 }
 
-/** @deprecated Use DeployResult from ./base.js instead */
-export type AgentProviderDeployResult = DeployResult;
 
 /**
  * Generic adapter for any hosted agent platform.
