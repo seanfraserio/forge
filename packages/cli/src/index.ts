@@ -1,16 +1,20 @@
 #!/usr/bin/env node
+import { createRequire } from "node:module";
 import { Command } from "commander";
 import { deployCommand } from "./commands/deploy.js";
 import { diffCommand } from "./commands/diff.js";
 import { rollbackCommand } from "./commands/rollback.js";
 import { validateCommand } from "./commands/validate.js";
 
+const require_ = createRequire(import.meta.url);
+const pkg = require_("../package.json") as { version: string };
+
 const program = new Command();
 
 program
   .name("forge")
   .description("Agent infrastructure as code — the Terraform for AI agents")
-  .version("0.1.0");
+  .version(pkg.version);
 
 program
   .command("deploy")
