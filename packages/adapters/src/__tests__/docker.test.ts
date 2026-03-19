@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { ModelConfig } from "@openforge-ai/sdk";
 
 vi.mock("node:child_process", () => ({
-  exec: vi.fn(),
+  execFile: vi.fn(),
 }));
 
 vi.mock("node:util", () => ({
@@ -20,11 +20,11 @@ vi.mock("node:crypto", () => ({
 }));
 
 import { DockerAdapter } from "../docker.js";
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 import { writeFile } from "node:fs/promises";
 
-// Since promisify is mocked to return the fn as-is, exec itself is the mock
-const mockExecAsync = vi.mocked(exec) as unknown as ReturnType<typeof vi.fn>;
+// Since promisify is mocked to return the fn as-is, execFile itself is the mock
+const mockExecFileAsync = vi.mocked(execFile) as unknown as ReturnType<typeof vi.fn>;
 
 const anthropicModel: ModelConfig = { provider: "anthropic", name: "claude-sonnet-4-5-20251001" };
 const openaiModel: ModelConfig = { provider: "openai", name: "gpt-4o" };
@@ -84,7 +84,7 @@ describe("DockerAdapter — validateModel", () => {
 describe("DockerAdapter — deploy", () => {
   it("builds and runs a container successfully", async () => {
     // Mock docker build, docker rm -f (fail = no existing container), docker run
-    mockExecAsync
+    mockExecFileAsync
       .mockResolvedValueOnce({ stdout: "", stderr: "" }) // docker build
       .mockRejectedValueOnce(new Error("no such container")) // docker rm -f
       .mockResolvedValueOnce({ stdout: "abc123def456ghij\n", stderr: "" }); // docker run
@@ -100,7 +100,7 @@ describe("DockerAdapter — deploy", () => {
   });
 
   it("returns error when docker build fails", async () => {
-    mockExecAsync.mockRejectedValueOnce(new Error("build error: no space left on device"));
+    mockExecFileAsync.mockRejectedValueOnce(new Error("build error: no space left on device"));
 
     const adapter = new DockerAdapter();
     const result = await adapter.deploy(anthropicModel);
@@ -110,7 +110,7 @@ describe("DockerAdapter — deploy", () => {
   });
 
   it("returns error when docker run fails", async () => {
-    mockExecAsync
+    mockExecFileAsync
       .mockResolvedValueOnce({ stdout: "", stderr: "" }) // docker build
       .mockRejectedValueOnce(new Error("no such container")) // docker rm -f
       .mockRejectedValueOnce(new Error("port already in use")); // docker run
@@ -123,7 +123,7 @@ describe("DockerAdapter — deploy", () => {
   });
 
   it("pushes to registry when configured", async () => {
-    mockExecAsync
+    mockExecFileAsync
       .mockResolvedValueOnce({ stdout: "", stderr: "" }) // docker build
       .mockResolvedValueOnce({ stdout: "", stderr: "" }) // docker push
       .mockRejectedValueOnce(new Error("no container")) // docker rm -f
@@ -140,7 +140,7 @@ describe("DockerAdapter — deploy", () => {
   });
 
   it("returns error when docker push fails", async () => {
-    mockExecAsync
+    mockExecFileAsync
       .mockResolvedValueOnce({ stdout: "", stderr: "" }) // docker build
       .mockRejectedValueOnce(new Error("auth required")); // docker push
 
@@ -155,7 +155,7 @@ describe("DockerAdapter — deploy", () => {
   });
 
   it("writes Dockerfile with correct content", async () => {
-    mockExecAsync
+    mockExecFileAsync
       .mockResolvedValueOnce({ stdout: "", stderr: "" }) // docker build
       .mockRejectedValueOnce(new Error("no container")) // docker rm -f
       .mockResolvedValueOnce({ stdout: "container123\n", stderr: "" }); // docker run
@@ -176,7 +176,7 @@ describe("DockerAdapter — deploy", () => {
   });
 
   it("writes system prompt file when provided", async () => {
-    mockExecAsync
+    mockExecFileAsync
       .mockResolvedValueOnce({ stdout: "", stderr: "" }) // docker build
       .mockRejectedValueOnce(new Error("no container")) // docker rm -f
       .mockResolvedValueOnce({ stdout: "container123\n", stderr: "" }); // docker run
@@ -197,7 +197,7 @@ describe("DockerAdapter — deploy", () => {
   });
 
   it("includes env vars and network in docker run command", async () => {
-    mockExecAsync
+    mockExecFileAsync
       .mockResolvedValueOnce({ stdout: "", stderr: "" }) // docker build
       .mockRejectedValueOnce(new Error("no container")) // docker rm -f
       .mockResolvedValueOnce({ stdout: "container123\n", stderr: "" }); // docker run
@@ -208,16 +208,19 @@ describe("DockerAdapter — deploy", () => {
     });
     await adapter.deploy(anthropicModel, { name: "my-agent" });
 
-    const runCall = mockExecAsync.mock.calls[2][0] as string;
-    expect(runCall).toContain('-e "API_KEY=secret"');
-    expect(runCall).toContain('-e "NODE_ENV=production"');
-    expect(runCall).toContain("--network my-net");
+    // execFileAsync is called with ("docker", [...args], opts) — check the args array
+    const runArgs = mockExecFileAsync.mock.calls[2][1] as string[];
+    expect(runArgs).toContain("--name");
+    expect(runArgs).toContain("my-agent");
+    expect(runArgs).toEqual(expect.arrayContaining(["-e", "API_KEY=secret"]));
+    expect(runArgs).toEqual(expect.arrayContaining(["-e", "NODE_ENV=production"]));
+    expect(runArgs).toEqual(expect.arrayContaining(["--network", "my-net"]));
   });
 });
 
 describe("DockerAdapter — getDependencies (via deploy)", () => {
   it("includes anthropic SDK for anthropic provider", async () => {
-    mockExecAsync
+    mockExecFileAsync
       .mockResolvedValueOnce({ stdout: "", stderr: "" })
       .mockRejectedValueOnce(new Error("no container"))
       .mockResolvedValueOnce({ stdout: "container123\n", stderr: "" });
@@ -236,7 +239,7 @@ describe("DockerAdapter — getDependencies (via deploy)", () => {
   });
 
   it("includes openai SDK for openai provider", async () => {
-    mockExecAsync
+    mockExecFileAsync
       .mockResolvedValueOnce({ stdout: "", stderr: "" })
       .mockRejectedValueOnce(new Error("no container"))
       .mockResolvedValueOnce({ stdout: "container123\n", stderr: "" });
@@ -254,7 +257,7 @@ describe("DockerAdapter — getDependencies (via deploy)", () => {
   });
 
   it("includes google AI SDK for google provider", async () => {
-    mockExecAsync
+    mockExecFileAsync
       .mockResolvedValueOnce({ stdout: "", stderr: "" })
       .mockRejectedValueOnce(new Error("no container"))
       .mockResolvedValueOnce({ stdout: "container123\n", stderr: "" });
@@ -272,7 +275,7 @@ describe("DockerAdapter — getDependencies (via deploy)", () => {
   });
 
   it("returns empty dependencies for unknown providers", async () => {
-    mockExecAsync
+    mockExecFileAsync
       .mockResolvedValueOnce({ stdout: "", stderr: "" })
       .mockRejectedValueOnce(new Error("no container"))
       .mockResolvedValueOnce({ stdout: "container123\n", stderr: "" });
@@ -292,19 +295,20 @@ describe("DockerAdapter — getDependencies (via deploy)", () => {
 
 describe("DockerAdapter — destroy", () => {
   it("calls docker rm -f", async () => {
-    mockExecAsync.mockResolvedValueOnce({ stdout: "", stderr: "" });
+    mockExecFileAsync.mockResolvedValueOnce({ stdout: "", stderr: "" });
 
     const adapter = new DockerAdapter();
     const result = await adapter.destroy("my-agent");
 
     expect(result.success).toBe(true);
-    expect(mockExecAsync).toHaveBeenCalledWith(
-      "docker rm -f my-agent",
+    expect(mockExecFileAsync).toHaveBeenCalledWith(
+      "docker",
+      ["rm", "-f", "my-agent"],
     );
   });
 
   it("returns error when container does not exist", async () => {
-    mockExecAsync.mockRejectedValueOnce(new Error("No such container: my-agent"));
+    mockExecFileAsync.mockRejectedValueOnce(new Error("No such container: my-agent"));
 
     const adapter = new DockerAdapter();
     const result = await adapter.destroy("my-agent");
@@ -316,7 +320,7 @@ describe("DockerAdapter — destroy", () => {
 
 describe("DockerAdapter — status", () => {
   it("returns active status for a running container", async () => {
-    mockExecAsync.mockResolvedValueOnce({
+    mockExecFileAsync.mockResolvedValueOnce({
       stdout: "true abc123def456ghij 2025-01-01T00:00:00Z",
       stderr: "",
     });
@@ -331,7 +335,7 @@ describe("DockerAdapter — status", () => {
   });
 
   it("returns active: false when container does not exist", async () => {
-    mockExecAsync.mockRejectedValueOnce(new Error("No such container"));
+    mockExecFileAsync.mockRejectedValueOnce(new Error("No such container"));
 
     const adapter = new DockerAdapter();
     const result = await adapter.status("nonexistent");
@@ -341,7 +345,7 @@ describe("DockerAdapter — status", () => {
   });
 
   it("returns active: false for a stopped container", async () => {
-    mockExecAsync.mockResolvedValueOnce({
+    mockExecFileAsync.mockResolvedValueOnce({
       stdout: "false abc123def456ghij 2025-01-01T00:00:00Z",
       stderr: "",
     });
@@ -356,7 +360,7 @@ describe("DockerAdapter — status", () => {
 
 describe("DockerAdapter — logs", () => {
   it("returns log output from a container", async () => {
-    mockExecAsync.mockResolvedValueOnce({
+    mockExecFileAsync.mockResolvedValueOnce({
       stdout: "Forge agent running on port 3000\nProcessing request...",
       stderr: "",
     });
@@ -368,7 +372,7 @@ describe("DockerAdapter — logs", () => {
   });
 
   it("returns empty string when container does not exist", async () => {
-    mockExecAsync.mockRejectedValueOnce(new Error("No such container"));
+    mockExecFileAsync.mockRejectedValueOnce(new Error("No such container"));
 
     const adapter = new DockerAdapter();
     const result = await adapter.logs("nonexistent");
@@ -377,13 +381,14 @@ describe("DockerAdapter — logs", () => {
   });
 
   it("uses custom tail count", async () => {
-    mockExecAsync.mockResolvedValueOnce({ stdout: "line1\nline2", stderr: "" });
+    mockExecFileAsync.mockResolvedValueOnce({ stdout: "line1\nline2", stderr: "" });
 
     const adapter = new DockerAdapter();
     await adapter.logs("my-agent", 100);
 
-    expect(mockExecAsync).toHaveBeenCalledWith(
-      "docker logs --tail 100 my-agent",
+    expect(mockExecFileAsync).toHaveBeenCalledWith(
+      "docker",
+      ["logs", "--tail", "100", "my-agent"],
     );
   });
 });

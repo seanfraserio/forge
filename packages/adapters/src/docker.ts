@@ -1,12 +1,33 @@
 import type { ModelConfig } from "@openforge-ai/sdk";
-import { exec } from "node:child_process";
+import { execFile } from "node:child_process";
 import { writeFile, mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { randomUUID } from "node:crypto";
 import { promisify } from "node:util";
 import type { RuntimeAdapter, DeployResult, DestroyResult, StatusResult } from "./base.js";
 
-const execAsync = promisify(exec);
+const execFileAsync = promisify(execFile);
+
+/** Validates that a string is safe for use as a Docker name (container, network, image tag component). */
+function assertDockerName(value: string, label: string): void {
+  if (!/^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(value)) {
+    throw new Error(`Invalid ${label}: must match /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/`);
+  }
+}
+
+/** Validates a Docker image reference (e.g., "node:20-alpine", "registry.io/repo/img:tag"). */
+function assertImageRef(value: string): void {
+  if (/[\n\r]/.test(value) || !/^[a-zA-Z0-9][a-zA-Z0-9._/:@-]*$/.test(value)) {
+    throw new Error(`Invalid image reference: ${value}`);
+  }
+}
+
+/** Validates environment variable keys. */
+function assertEnvKey(key: string): void {
+  if (!/^[a-zA-Z_][a-zA-Z0-9_]*$/.test(key)) {
+    throw new Error(`Invalid environment variable key: ${key}`);
+  }
+}
 
 export interface DockerDeployOptions {
   registry?: string;
@@ -36,6 +57,14 @@ export class DockerAdapter implements RuntimeAdapter {
     this.push = options.push ?? false;
     this.network = options.network;
     this.envVars = options.envVars ?? {};
+
+    // Validate inputs that will be used in shell commands and Dockerfiles
+    assertImageRef(this.runtime);
+    if (this.registry) assertImageRef(this.registry);
+    if (this.network) assertDockerName(this.network, "network name");
+    for (const key of Object.keys(this.envVars)) {
+      assertEnvKey(key);
+    }
   }
 
   validateModel(_model: ModelConfig): boolean {
@@ -49,6 +78,7 @@ export class DockerAdapter implements RuntimeAdapter {
     port?: number;
   }): Promise<DeployResult> {
     const agentName = agentConfig?.name ?? "forge-agent";
+    assertDockerName(agentName, "agent name");
     const port = agentConfig?.port ?? 3000;
     const tag = `${agentName}:${Date.now()}`;
     const imageRef = this.registry ? `${this.registry}/${tag}` : tag;
@@ -83,7 +113,7 @@ export class DockerAdapter implements RuntimeAdapter {
 
       // Build image
       try {
-        await execAsync(`docker build -t ${imageRef} .`, {
+        await execFileAsync("docker", ["build", "-t", imageRef, "."], {
           cwd: buildDir,
           timeout: 300000,
         });
@@ -94,7 +124,7 @@ export class DockerAdapter implements RuntimeAdapter {
       // Push if registry configured
       if (this.push && this.registry) {
         try {
-          await execAsync(`docker push ${imageRef}`, { timeout: 120000 });
+          await execFileAsync("docker", ["push", imageRef], { timeout: 120000 });
         } catch (err) {
           return { success: false, error: `Docker push failed: ${(err as Error).message}` };
         }
@@ -102,21 +132,20 @@ export class DockerAdapter implements RuntimeAdapter {
 
       // Stop and remove existing container with same name (if any)
       try {
-        await execAsync(`docker rm -f ${agentName}`);
+        await execFileAsync("docker", ["rm", "-f", agentName]);
       } catch {
         // Container doesn't exist, that's fine
       }
 
       // Run container
-      const envFlags = Object.entries(this.envVars)
-        .map(([k, v]) => `-e "${k}=${v}"`)
-        .join(" ");
-      const networkFlag = this.network ? `--network ${this.network}` : "";
+      const envArgs = Object.entries(this.envVars).flatMap(([k, v]) => ["-e", `${k}=${v}`]);
+      const networkArgs = this.network ? ["--network", this.network] : [];
 
       try {
-        const result = await execAsync(
-          `docker run -d --name ${agentName} -p ${port}:${port} ${envFlags} ${networkFlag} ${imageRef}`,
-          { timeout: 30000 }
+        const result = await execFileAsync(
+          "docker",
+          ["run", "-d", "--name", agentName, "-p", `127.0.0.1:${port}:${port}`, ...envArgs, ...networkArgs, imageRef],
+          { timeout: 30000 },
         );
 
         return {
@@ -139,7 +168,8 @@ export class DockerAdapter implements RuntimeAdapter {
   // Stop and remove a deployed container
   async destroy(agentName: string): Promise<DestroyResult> {
     try {
-      await execAsync(`docker rm -f ${agentName}`);
+      assertDockerName(agentName, "agent name");
+      await execFileAsync("docker", ["rm", "-f", agentName]);
       return { success: true };
     } catch (err) {
       return { success: false, error: (err as Error).message };
@@ -149,8 +179,10 @@ export class DockerAdapter implements RuntimeAdapter {
   // Check if a container is running
   async status(agentName: string): Promise<StatusResult> {
     try {
-      const result = await execAsync(
-        `docker inspect --format='{{.State.Running}} {{.Id}} {{.State.StartedAt}}' ${agentName}`,
+      assertDockerName(agentName, "agent name");
+      const result = await execFileAsync(
+        "docker",
+        ["inspect", "--format", "{{.State.Running}} {{.Id}} {{.State.StartedAt}}", agentName],
       );
       const [running, id, startedAt] = result.stdout.trim().split(" ");
       return {
@@ -169,7 +201,8 @@ export class DockerAdapter implements RuntimeAdapter {
   // Get logs from a running container
   async logs(agentName: string, tail: number = 50): Promise<string> {
     try {
-      const result = await execAsync(`docker logs --tail ${tail} ${agentName}`);
+      assertDockerName(agentName, "agent name");
+      const result = await execFileAsync("docker", ["logs", "--tail", String(tail), agentName]);
       return result.stdout;
     } catch {
       return "";
@@ -193,7 +226,7 @@ ${clientSetup}
 const server = createServer(async (req, res) => {
   if (req.method === "GET" && req.url === "/health") {
     res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ status: "ok", agent: "${agentName}" }));
+    res.end(JSON.stringify({ status: "ok", agent: ${JSON.stringify(agentName)} }));
     return;
   }
   if (req.method !== "POST") { res.writeHead(405); res.end(); return; }
@@ -232,7 +265,7 @@ server.listen(${port}, "0.0.0.0", () => {
         `import Anthropic from "@anthropic-ai/sdk";`,
         `const client = new Anthropic();`,
         `const response = await client.messages.create({
-        model: "${model.name}",
+        model: ${JSON.stringify(model.name)},
         max_tokens: ${model.max_tokens ?? 1024},
         temperature: ${model.temperature ?? 0.7},
         system: systemPrompt || undefined,
@@ -250,7 +283,7 @@ server.listen(${port}, "0.0.0.0", () => {
         ? [{ role: "system", content: systemPrompt }, ...messages]
         : messages;
       const response = await client.chat.completions.create({
-        model: "${model.name}",
+        model: ${JSON.stringify(model.name)},
         max_tokens: ${model.max_tokens ?? 1024},
         temperature: ${model.temperature ?? 0.7},
         messages: allMessages,
@@ -262,11 +295,11 @@ import { createServer } from "node:http";
 const server = createServer((req, res) => {
   if (req.method === "GET" && req.url === "/health") {
     res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify({ status: "ok", agent: "${name}", provider: "${model.provider}" }));
+    res.end(JSON.stringify({ status: "ok", agent: ${JSON.stringify(name)}, provider: ${JSON.stringify(model.provider)} }));
     return;
   }
   res.writeHead(501, { "Content-Type": "application/json" });
-  res.end(JSON.stringify({ error: "Provider '${model.provider}' runner not yet implemented" }));
+  res.end(JSON.stringify({ error: "Provider " + ${JSON.stringify(model.provider)} + " runner not yet implemented" }));
 });
 server.listen(${port}, "0.0.0.0", () => {
   console.log("Forge agent running on port ${port}");

@@ -1,7 +1,7 @@
 {
   "name": "@openforge-ai/cli",
-  "version": "0.2.0",
-  "description": "Agent infrastructure as code — the Terraform for AI agents",
+  "version": "0.2.1",
+  "description": "Agent infrastructure as code \u2014 the Terraform for AI agents",
   "type": "module",
   "license": "MIT",
   "repository": {
@@ -12,8 +12,18 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": ["dist"],
-  "keywords": ["forge", "ai", "agents", "infrastructure-as-code", "mcp", "cli", "terraform"],
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "forge",
+    "ai",
+    "agents",
+    "infrastructure-as-code",
+    "mcp",
+    "cli",
+    "terraform"
+  ],
   "bin": {
     "forge": "./dist/index.js"
   },

@@ -1,6 +1,6 @@
 {
   "name": "@openforge-ai/adapters",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "LLM provider adapters for Forge agent infrastructure",
   "type": "module",
   "license": "MIT",
@@ -12,8 +12,17 @@
   "publishConfig": {
     "access": "public"
   },
-  "files": ["dist"],
-  "keywords": ["forge", "ai", "agents", "adapters", "anthropic", "openai"],
+  "files": [
+    "dist"
+  ],
+  "keywords": [
+    "forge",
+    "ai",
+    "agents",
+    "adapters",
+    "anthropic",
+    "openai"
+  ],
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",

@@ -5,15 +5,21 @@ on:
     workflows: ["Release"]
     types: [completed]
 
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   update-formula:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - name: Extract version from tag
         id: version
+        env:
+          TAG: ${{ github.event.workflow_run.head_branch }}
         run: |
-          TAG="${{ github.event.workflow_run.head_branch }}"
           VERSION="${TAG#v}"
           echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
           echo "Detected version: ${VERSION}"

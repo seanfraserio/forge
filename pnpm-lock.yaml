@@ -51,6 +51,9 @@ importers:
 
   packages/cli:
     dependencies:
+      '@openforge-ai/adapters':
+        specifier: workspace:*
+        version: link:../adapters
       '@openforge-ai/sdk':
         specifier: workspace:*
         version: link:../sdk

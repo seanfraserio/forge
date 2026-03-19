@@ -7,14 +7,27 @@ import {
   DockerAdapter,
   AgentProviderAdapter,
 } from "@openforge-ai/adapters";
-import type { AdapterInterface } from "@openforge-ai/adapters";
+import type { AdapterInterface, DockerDeployOptions } from "@openforge-ai/adapters";
 
-export function resolveAdapter(config: { model: ModelConfig; deploy?: any }): AdapterInterface {
+interface DeployConfig extends DockerDeployOptions {
+  adapter?: "docker" | "agent-provider";
+  endpoint?: string;
+  api_key?: string;
+  platform_name?: string;
+  auth_header?: string;
+  auth_scheme?: string;
+  timeout_ms?: number;
+}
+
+export function resolveAdapter(config: { model: ModelConfig; deploy?: DeployConfig }): AdapterInterface {
   // If deploy config specifies an adapter, use that
   if (config.deploy?.adapter === "docker") {
     return new DockerAdapter(config.deploy);
   }
   if (config.deploy?.adapter === "agent-provider") {
+    if (!config.deploy.endpoint) {
+      throw new Error("agent-provider adapter requires an endpoint URL");
+    }
     return new AgentProviderAdapter({
       endpoint: config.deploy.endpoint,
       apiKey: config.deploy.api_key,
