@@ -125,7 +125,60 @@ export function plan(desired: ForgeConfig, actual: AgentState | null): PlanResul
     });
   }
 
-  // MCP servers diff
+  // System prompt changes
+  const desiredPrompt = JSON.stringify(desired.system_prompt ?? null);
+  const actualPrompt = JSON.stringify(actualConfig.system_prompt ?? null);
+  if (desiredPrompt !== actualPrompt) {
+    if (!actualConfig.system_prompt && desired.system_prompt) {
+      result.toCreate.push({
+        resource: "system_prompt",
+        newValue: desired.system_prompt,
+        summary: `Set system prompt from ${desired.system_prompt.file ?? "inline"}`,
+      });
+    } else if (actualConfig.system_prompt && !desired.system_prompt) {
+      result.toDelete.push({
+        resource: "system_prompt",
+        oldValue: actualConfig.system_prompt,
+        summary: `Remove system prompt`,
+      });
+    } else {
+      result.toUpdate.push({
+        resource: "system_prompt",
+        oldValue: actualConfig.system_prompt,
+        newValue: desired.system_prompt,
+        summary: `Update system prompt`,
+      });
+    }
+  }
+
+  // Memory changes
+  const desiredMemory = JSON.stringify(desired.memory ?? null);
+  const actualMemory = JSON.stringify(actualConfig.memory ?? null);
+  if (desiredMemory !== actualMemory) {
+    if (!actualConfig.memory && desired.memory) {
+      result.toCreate.push({
+        resource: "memory",
+        newValue: desired.memory,
+        summary: `Configure ${desired.memory.type} memory`,
+      });
+    } else if (actualConfig.memory && !desired.memory) {
+      result.toDelete.push({
+        resource: "memory",
+        oldValue: actualConfig.memory,
+        summary: `Remove memory configuration`,
+      });
+    } else if (desired.memory) {
+      result.toUpdate.push({
+        resource: "memory",
+        oldValue: actualConfig.memory,
+        newValue: desired.memory,
+        summary: `Update memory: ${desired.memory.type}${desired.memory.provider ? `/${desired.memory.provider}` : ""}`,
+      });
+    }
+  }
+
+  // MCP servers diff — compare by name and non-env fields to avoid phantom diffs
+  // from redacted env values in stored state
   const desiredServers = desired.tools?.mcp_servers ?? [];
   const actualServers = actualConfig.tools?.mcp_servers ?? [];
   const actualServerMap = new Map(actualServers.map((s) => [s.name, s]));
@@ -141,7 +194,11 @@ export function plan(desired: ForgeConfig, actual: AgentState | null): PlanResul
       });
     } else {
       const existing = actualServerMap.get(server.name)!;
-      if (JSON.stringify(server) !== JSON.stringify(existing)) {
+      // Compare command and args (not env — stored state has redacted env values)
+      const serverChanged =
+        server.command !== existing.command ||
+        JSON.stringify(server.args ?? []) !== JSON.stringify(existing.args ?? []);
+      if (serverChanged) {
         result.toUpdate.push({
           resource: "mcp_server",
           field: server.name,

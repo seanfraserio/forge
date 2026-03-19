@@ -1,4 +1,7 @@
 import chalk from "chalk";
+import { createInterface } from "node:readline";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { resolveEnvironment } from "../parser/validate.js";
 import { loadConfig } from "../parser/load.js";
 import { plan, formatPlan } from "../engine/planner.js";
@@ -6,12 +9,38 @@ import { apply } from "../engine/applier.js";
 import { readState } from "../engine/state.js";
 import type { ApplyOptions } from "@openforge-ai/sdk";
 
+const execFileAsync = promisify(execFile);
+
 export interface DeployCommandOptions {
   config: string;
   env: string;
   autoApprove: boolean;
   dryRun: boolean;
   allowHooks: boolean;
+}
+
+async function confirm(message: string): Promise<boolean> {
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => {
+    rl.question(`${message} [y/N] `, (answer) => {
+      rl.close();
+      resolve(answer.toLowerCase() === "y" || answer.toLowerCase() === "yes");
+    });
+  });
+}
+
+async function runHook(command: string, label: string): Promise<void> {
+  console.log(chalk.dim(`  Running ${label}: ${command}`));
+  try {
+    const { stdout, stderr } = await execFileAsync("/bin/sh", ["-c", command], {
+      timeout: 60_000,
+    });
+    if (stdout.trim()) console.log(chalk.dim(`  ${stdout.trim()}`));
+    if (stderr.trim()) console.warn(chalk.yellow(`  ${stderr.trim()}`));
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    throw new Error(`Hook "${label}" failed: ${msg}`);
+  }
 }
 
 export async function deployCommand(opts: DeployCommandOptions): Promise<void> {
@@ -40,55 +69,68 @@ export async function deployCommand(opts: DeployCommandOptions): Promise<void> {
     return;
   }
 
-  // 5. Confirm (unless auto-approve or dry-run)
+  // 5. Dry run — show plan only
   if (opts.dryRun) {
     console.log(chalk.yellow("\n⚠ Dry run — no changes applied."));
     return;
   }
 
+  // 6. Confirm (unless auto-approve)
   if (!opts.autoApprove) {
-    console.log(chalk.yellow("\nDo you want to apply these changes?"));
-    console.log(chalk.dim("  Use --auto-approve to skip this prompt.\n"));
-    // In a real CLI, we'd use readline for confirmation
-    // For the scaffold, auto-approve by default
+    const approved = await confirm(chalk.yellow("\nDo you want to apply these changes?"));
+    if (!approved) {
+      console.log(chalk.dim("Deploy cancelled."));
+      return;
+    }
   }
 
-  // 6. Warn about hooks
+  // 7. Run pre-deploy hooks
   const preHooks = config.hooks?.pre_deploy ?? [];
   const postHooks = config.hooks?.post_deploy ?? [];
+
   if (preHooks.length > 0 || postHooks.length > 0) {
-    console.log(chalk.yellow("\n⚠ Hooks detected in configuration:"));
-    for (const hook of preHooks) {
-      console.log(chalk.yellow(`  pre_deploy:  ${hook.run}`));
-    }
-    for (const hook of postHooks) {
-      console.log(chalk.yellow(`  post_deploy: ${hook.run}`));
-    }
     if (!opts.allowHooks) {
-      console.log(
-        chalk.yellow("  Hooks will NOT be executed. Pass --allow-hooks to enable hook execution.\n")
-      );
+      console.log(chalk.yellow("\n⚠ Hooks detected but --allow-hooks not set:"));
+      for (const hook of preHooks) {
+        console.log(chalk.yellow(`  pre_deploy:  ${hook.run}`));
+      }
+      for (const hook of postHooks) {
+        console.log(chalk.yellow(`  post_deploy: ${hook.run}`));
+      }
+      console.log(chalk.yellow("  Skipping hook execution.\n"));
+    } else {
+      for (const hook of preHooks) {
+        await runHook(hook.run, "pre_deploy");
+      }
     }
   }
 
-  // 7. Apply
+  // 8. Apply
   const applyOpts: ApplyOptions = {
-    dryRun: opts.dryRun,
+    dryRun: false,
     environment: opts.env,
     autoApprove: opts.autoApprove,
   };
 
-  const result = await apply(planResult, config, applyOpts);
+  try {
+    const result = await apply(planResult, config, applyOpts);
 
-  if (result.success) {
     console.log(chalk.green(`\n✓ Agent "${config.agent.name}" deployed to ${opts.env}`));
     if (result.state.endpoint) {
       console.log(chalk.dim(`  Endpoint: ${result.state.endpoint}`));
     }
     console.log(chalk.dim(`  Config hash: ${result.state.configHash.slice(0, 12)}...`));
     console.log(chalk.dim(`  State written to .forge/state.json`));
-  } else {
-    console.error(chalk.red(`\n✗ Deploy failed: ${result.error}`));
+
+    // 9. Run post-deploy hooks
+    if (opts.allowHooks) {
+      for (const hook of postHooks) {
+        await runHook(hook.run, "post_deploy");
+      }
+    }
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error(chalk.red(`\n✗ Deploy failed: ${msg}`));
     process.exit(1);
   }
 }

@@ -2,7 +2,7 @@ import chalk from "chalk";
 import { resolveEnvironment } from "../parser/validate.js";
 import { loadConfig } from "../parser/load.js";
 import { plan } from "../engine/planner.js";
-import { readState } from "../engine/state.js";
+import { readState, redactConfig } from "../engine/state.js";
 
 export interface DiffCommandOptions {
   config: string;
@@ -13,7 +13,9 @@ export async function diffCommand(opts: DiffCommandOptions): Promise<void> {
   const baseConfig = await loadConfig(opts.config);
   const config = resolveEnvironment(baseConfig, opts.env);
   const currentState = await readState(".forge");
-  const planResult = plan(config, currentState);
+  // Use redacted config for diff output to prevent secrets leaking to console
+  const redacted = redactConfig(config);
+  const planResult = plan(redacted, currentState);
 
   // Output colored diff
   if (!planResult.hasChanges) {

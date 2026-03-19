@@ -44,17 +44,18 @@ export function resolveEnvironment(
     return config;
   }
 
+  // Deep clone to prevent mutations leaking back to the original config
+  const resolved = JSON.parse(JSON.stringify(config)) as ForgeConfig;
   const override = config.environments[env];
-  const resolved = { ...config };
 
   if (override.model) {
-    resolved.model = { ...config.model, ...override.model };
+    resolved.model = { ...resolved.model, ...override.model };
   }
   if (override.tools) {
-    resolved.tools = override.tools;
+    resolved.tools = JSON.parse(JSON.stringify(override.tools));
   }
   if (override.memory) {
-    resolved.memory = override.memory;
+    resolved.memory = JSON.parse(JSON.stringify(override.memory));
   }
 
   return resolved;

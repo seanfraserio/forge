@@ -77,7 +77,7 @@ export async function writeState(
 /**
  * Deep-clone a config and redact sensitive values from MCP server env vars.
  */
-function redactConfig(config: ForgeConfig): ForgeConfig {
+export function redactConfig(config: ForgeConfig): ForgeConfig {
   const cloned = JSON.parse(JSON.stringify(config)) as ForgeConfig;
   if (cloned.tools?.mcp_servers) {
     for (const server of cloned.tools.mcp_servers) {
