@@ -34,6 +34,13 @@ jobs:
       - run: pnpm build
       - run: pnpm test
 
+      # Debug: check npmrc and auth state
+      - name: Debug npm auth
+        run: |
+          cat $NPM_CONFIG_USERCONFIG 2>/dev/null || echo "No userconfig"
+          cat ~/.npmrc 2>/dev/null || echo "No ~/.npmrc"
+          npm whoami 2>&1 || echo "Not authenticated"
+
       # Publish each package using npm (not pnpm) for OIDC trusted publishing support
       - name: Publish SDK
         run: cd packages/sdk && npm publish --access public --provenance
