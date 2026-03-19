@@ -57,12 +57,3 @@ export abstract class BaseLLMAdapter implements AdapterInterface {
   }
 }
 
-// ─── Utilities ───
-
-export async function catchAsResult<T>(fn: () => Promise<T>): Promise<T | DestroyResult> {
-  try {
-    return await fn();
-  } catch (err) {
-    return { success: false, error: err instanceof Error ? err.message : String(err) };
-  }
-}

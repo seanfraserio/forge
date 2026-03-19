@@ -48,6 +48,9 @@ export function resolveAdapter(config: { model: ModelConfig; deploy?: DeployConf
       return new GoogleAdapter();
     case "ollama":
       return new OllamaAdapter();
+    case "bedrock":
+      // Bedrock uses the same API shape as Anthropic (Claude on AWS)
+      return new AnthropicAdapter();
     default:
       throw new Error(`Unknown provider: ${config.model.provider}`);
   }

@@ -215,7 +215,8 @@ describe("AgentProviderAdapter — deploy", () => {
     const result = await adapter.deploy(anthropicModel);
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain("OpenClaw returned 422");
+    expect(result.error).toContain("OpenClaw");
+    expect(result.error).toContain("422");
     expect(result.error).toContain("Invalid model configuration");
   });
 
@@ -230,7 +231,6 @@ describe("AgentProviderAdapter — deploy", () => {
     const result = await adapter.deploy(anthropicModel);
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain("Failed to reach Hermes");
     expect(result.error).toContain("ECONNREFUSED");
   });
 
@@ -350,6 +350,7 @@ describe("AgentProviderAdapter — status", () => {
     mockFetch.mockResolvedValueOnce({
       ok: false,
       status: 404,
+      text: async () => "Not found",
     });
 
     const adapter = new AgentProviderAdapter({
@@ -359,7 +360,7 @@ describe("AgentProviderAdapter — status", () => {
     const result = await adapter.status("nonexistent");
 
     expect(result.active).toBe(false);
-    expect(result.error).toContain("HTTP 404");
+    expect(result.error).toContain("404");
   });
 
   it("returns error when no API key", async () => {
@@ -401,7 +402,7 @@ describe("AgentProviderAdapter — destroy", () => {
     const result = await adapter.destroy("agent-42");
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain("HTTP 500");
+    expect(result.error).toContain("500");
   });
 
   it("returns error when no API key", async () => {
@@ -454,7 +455,8 @@ describe("AgentProviderAdapter — invoke", () => {
     const result = await adapter.invoke("agent-42", [{ role: "user", content: "Hi" }]);
 
     expect(result.success).toBe(false);
-    expect(result.error).toContain("Invoke failed (429)");
+    expect(result.error).toContain("429");
+    expect(result.error).toContain("Rate limit exceeded");
   });
 
   it("returns error on network failure", async () => {

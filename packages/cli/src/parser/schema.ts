@@ -15,6 +15,15 @@ export const systemPromptSchema = z.object({
 }).refine(
   (data) => data.file || data.inline,
   { message: "system_prompt must specify either 'file' or 'inline'" }
+).refine(
+  (data) => {
+    if (!data.file) return true;
+    // Reject absolute paths and path traversal
+    if (data.file.startsWith("/") || data.file.startsWith("\\")) return false;
+    if (data.file.includes("..")) return false;
+    return true;
+  },
+  { message: "system_prompt.file must be a relative path within the project (no absolute paths or '..')" }
 );
 
 export const mcpServerSchema = z.object({
@@ -71,5 +80,3 @@ export const forgeConfigSchema = z.object({
   hooks: hooksConfigSchema.optional(),
 });
 
-export type ForgeConfigInput = z.input<typeof forgeConfigSchema>;
-export type ForgeConfigParsed = z.output<typeof forgeConfigSchema>;

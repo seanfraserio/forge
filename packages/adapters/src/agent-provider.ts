@@ -82,37 +82,41 @@ export class AgentProviderAdapter implements RuntimeAdapter {
     return true;
   }
 
-  async deploy(model: ModelConfig, agent?: AgentDefinition): Promise<DeployResult> {
+  private assertApiKey(): void {
     if (!this.apiKey) {
-      return {
-        success: false,
-        error: `API key not configured for ${this.platformName}. Set AGENT_PROVIDER_API_KEY or pass apiKey in options.`,
-      };
+      throw new Error(
+        `API key not configured for ${this.platformName}. Set AGENT_PROVIDER_API_KEY or pass apiKey in options.`
+      );
+    }
+  }
+
+  private async request(method: string, path: string, body?: unknown): Promise<Record<string, unknown>> {
+    const url = `${this.endpoint}${path}`;
+    const response = await fetch(url, {
+      method,
+      headers: this.headers,
+      body: body ? JSON.stringify(body) : undefined,
+      signal: AbortSignal.timeout(this.timeoutMs),
+    });
+
+    if (!response.ok) {
+      const error = await response.text().catch(() => "Unknown error");
+      throw new Error(`${this.platformName} ${method} ${path} returned ${response.status}: ${error}`);
     }
 
-    const body: AgentDefinition = agent ?? {
-      name: "forge-agent",
-      model,
-    };
+    if (method === "DELETE") {
+      await response.text(); // drain body
+      return {};
+    }
 
+    return await response.json() as Record<string, unknown>;
+  }
+
+  async deploy(model: ModelConfig, agent?: AgentDefinition): Promise<DeployResult> {
     try {
-      const response = await fetch(`${this.endpoint}/agents`, {
-        method: "POST",
-        headers: this.headers,
-        body: JSON.stringify(body),
-        signal: AbortSignal.timeout(this.timeoutMs),
-      });
-
-      if (!response.ok) {
-        const error = await response.text().catch(() => "Unknown error");
-        return {
-          success: false,
-          error: `${this.platformName} returned ${response.status}: ${error}`,
-        };
-      }
-
-      const result = await response.json() as Record<string, unknown>;
-
+      this.assertApiKey();
+      const body: AgentDefinition = agent ?? { name: "forge-agent", model };
+      const result = await this.request("POST", "/agents", body);
       return {
         success: true,
         agentId: (result.id as string) ?? (result.agent_id as string),
@@ -122,37 +126,19 @@ export class AgentProviderAdapter implements RuntimeAdapter {
         metadata: result,
       };
     } catch (err) {
-      return {
-        success: false,
-        error: `Failed to reach ${this.platformName}: ${(err as Error).message}`,
-      };
+      return { success: false, error: (err as Error).message };
     }
   }
 
-  // Update an existing agent
   async update(agentId: string, agent: Partial<AgentDefinition>): Promise<DeployResult> {
-    if (!this.apiKey) {
-      return { success: false, error: "API key not configured" };
-    }
-
     try {
-      const response = await fetch(`${this.endpoint}/agents/${agentId}`, {
-        method: "PUT",
-        headers: this.headers,
-        body: JSON.stringify(agent),
-        signal: AbortSignal.timeout(this.timeoutMs),
-      });
-
-      if (!response.ok) {
-        const error = await response.text().catch(() => "Unknown error");
-        return { success: false, error: `Update failed (${response.status}): ${error}` };
-      }
-
-      const result = await response.json() as Record<string, unknown>;
+      this.assertApiKey();
+      const id = encodeURIComponent(agentId);
+      const result = await this.request("PUT", `/agents/${id}`, agent);
       return {
         success: true,
         agentId,
-        endpoint: (result.endpoint as string) ?? `${this.endpoint}/agents/${agentId}`,
+        endpoint: (result.endpoint as string) ?? `${this.endpoint}/agents/${id}`,
         version: result.version as string,
         status: (result.status as string) ?? "active",
         metadata: result,
@@ -162,24 +148,11 @@ export class AgentProviderAdapter implements RuntimeAdapter {
     }
   }
 
-  // Get agent status
   async status(agentId: string): Promise<StatusResult> {
-    if (!this.apiKey) {
-      return { active: false, error: "API key not configured" };
-    }
-
     try {
-      const response = await fetch(`${this.endpoint}/agents/${agentId}`, {
-        method: "GET",
-        headers: this.headers,
-        signal: AbortSignal.timeout(this.timeoutMs),
-      });
-
-      if (!response.ok) {
-        return { active: false, status: "unknown", error: `HTTP ${response.status}` };
-      }
-
-      const result = await response.json() as Record<string, unknown>;
+      this.assertApiKey();
+      const id = encodeURIComponent(agentId);
+      const result = await this.request("GET", `/agents/${id}`);
       const status = (result.status as string) ?? "unknown";
       return {
         active: status === "active" || status === "running",
@@ -191,52 +164,26 @@ export class AgentProviderAdapter implements RuntimeAdapter {
     }
   }
 
-  // Delete/destroy an agent
   async destroy(agentId: string): Promise<DestroyResult> {
-    if (!this.apiKey) {
-      return { success: false, error: "API key not configured" };
-    }
-
     try {
-      const response = await fetch(`${this.endpoint}/agents/${agentId}`, {
-        method: "DELETE",
-        headers: this.headers,
-        signal: AbortSignal.timeout(this.timeoutMs),
-      });
-
-      // Drain the response body to release the connection
-      await response.text();
-
-      return { success: response.ok, error: response.ok ? undefined : `HTTP ${response.status}` };
+      this.assertApiKey();
+      const id = encodeURIComponent(agentId);
+      await this.request("DELETE", `/agents/${id}`);
+      return { success: true };
     } catch (err) {
       return { success: false, error: (err as Error).message };
     }
   }
 
-  // Invoke an agent (send a message)
   async invoke(agentId: string, messages: Array<{ role: string; content: string }>): Promise<{
     success: boolean;
     response?: unknown;
     error?: string;
   }> {
-    if (!this.apiKey) {
-      return { success: false, error: "API key not configured" };
-    }
-
     try {
-      const response = await fetch(`${this.endpoint}/agents/${agentId}/run`, {
-        method: "POST",
-        headers: this.headers,
-        body: JSON.stringify({ messages }),
-        signal: AbortSignal.timeout(this.timeoutMs),
-      });
-
-      if (!response.ok) {
-        const error = await response.text().catch(() => "Unknown error");
-        return { success: false, error: `Invoke failed (${response.status}): ${error}` };
-      }
-
-      const result = await response.json();
+      this.assertApiKey();
+      const id = encodeURIComponent(agentId);
+      const result = await this.request("POST", `/agents/${id}/run`, { messages });
       return { success: true, response: result };
     } catch (err) {
       return { success: false, error: (err as Error).message };

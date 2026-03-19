@@ -1,9 +1,37 @@
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir, stat } from "node:fs/promises";
 import { createHash } from "node:crypto";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
+import { z } from "zod";
 import type { AgentState, ForgeConfig } from "@openforge-ai/sdk";
 
+/**
+ * Zod schema for validating state.json structure.
+ * Protects against tampered state files and prototype pollution.
+ */
+const agentStateSchema = z.object({
+  configHash: z.string(),
+  lastDeployed: z.string(),
+  environment: z.string(),
+  agentName: z.string(),
+  agentVersion: z.string().optional(),
+  config: z.object({}).passthrough(),
+  endpoint: z.string().optional(),
+  agentId: z.string().optional(),
+}).passthrough();
+
 const STATE_FILE = "state.json";
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+/**
+ * Validate stateDir against path traversal attacks.
+ * Rejects paths containing '..' segments to prevent writing outside the intended directory.
+ */
+function validateStateDir(stateDir: string): void {
+  const normalized = resolve(stateDir);
+  if (stateDir.includes("..")) {
+    throw new Error(`stateDir must not contain path traversal ('..').  Got: ${stateDir}`);
+  }
+}
 
 /**
  * Deep-sort all object keys recursively to ensure deterministic serialization.
@@ -33,20 +61,23 @@ export function hashConfig(config: ForgeConfig): string {
  * Returns null if no state file exists.
  */
 export async function readState(stateDir: string): Promise<AgentState | null> {
+  validateStateDir(stateDir);
   const statePath = join(stateDir, STATE_FILE);
   try {
+    // Check file size before reading into memory
+    const fileStat = await stat(statePath);
+    if (fileStat.size > MAX_FILE_SIZE) {
+      console.warn(`Warning: State file too large (${fileStat.size} bytes). Treating as no prior state.`);
+      return null;
+    }
     const raw = await readFile(statePath, "utf-8");
     const parsed = JSON.parse(raw);
-    if (
-      typeof parsed !== "object" ||
-      parsed === null ||
-      typeof parsed.configHash !== "string" ||
-      typeof parsed.agentName !== "string"
-    ) {
+    const validated = agentStateSchema.safeParse(parsed);
+    if (!validated.success) {
       console.warn("Warning: State file has invalid structure. Treating as no prior state.");
       return null;
     }
-    return parsed as AgentState;
+    return validated.data as AgentState;
   } catch (err: unknown) {
     if (err instanceof Error && "code" in err && (err as NodeJS.ErrnoException).code === "ENOENT") {
       return null;
@@ -64,6 +95,7 @@ export async function writeState(
   stateDir: string,
   state: AgentState
 ): Promise<void> {
+  validateStateDir(stateDir);
   const statePath = join(stateDir, STATE_FILE);
 
   await mkdir(stateDir, { recursive: true, mode: 0o700 });

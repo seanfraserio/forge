@@ -1,6 +1,5 @@
 export {
   BaseLLMAdapter,
-  catchAsResult,
 } from "./base.js";
 export type {
   AdapterInterface,
@@ -18,6 +17,6 @@ export type { OpenAIDeployOptions } from "./openai.js";
 export { OllamaAdapter } from "./ollama.js";
 export type { OllamaDeployOptions } from "./ollama.js";
 export { DockerAdapter } from "./docker.js";
-export type { DockerDeployOptions, DockerDeployResult } from "./docker.js";
+export type { DockerDeployOptions } from "./docker.js";
 export { AgentProviderAdapter } from "./agent-provider.js";
-export type { AgentProviderDeployOptions, AgentProviderDeployResult, AgentDefinition } from "./agent-provider.js";
+export type { AgentProviderDeployOptions, AgentDefinition } from "./agent-provider.js";
