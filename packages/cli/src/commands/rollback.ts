@@ -25,6 +25,6 @@ export async function rollbackCommand(opts: RollbackCommandOptions): Promise<voi
     console.log(chalk.dim("  State history tracking coming in a future release."));
   } else {
     console.log(chalk.yellow("\n⚠ Specify a target hash to roll back to."));
-    console.log(chalk.dim("  Usage: forge rollback --target <hash>"));
+    console.log(chalk.dim("  Usage: forgeai rollback --target <hash>"));
   }
 }

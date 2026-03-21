@@ -6,7 +6,7 @@ Solutions for common errors encountered when using Forge.
 
 ## Validation errors
 
-These errors appear when running `forge validate` or `forge deploy`.
+These errors appear when running `forgeai validate` or `forgeai deploy`.
 
 ### Missing required fields
 
@@ -90,18 +90,18 @@ If you want to force a redeployment with the same config, delete the state file:
 
 ```bash
 rm -rf .forge/
-forge deploy --env dev
+forgeai deploy --env dev
 ```
 
 ### State file corrupted
 
-**Symptoms:** `forge deploy` or `forge diff` crashes with a JSON parse error, or reports unexpected state.
+**Symptoms:** `forgeai deploy` or `forgeai diff` crashes with a JSON parse error, or reports unexpected state.
 
 Delete the `.forge/` directory and redeploy. State is reconstructed on the next deployment:
 
 ```bash
 rm -rf .forge/
-forge deploy --env dev
+forgeai deploy --env dev
 ```
 
 The `.forge/` directory contains only local deployment state. Deleting it does not affect running agents or external systems.
@@ -171,11 +171,11 @@ Verify the variable is set:
 echo $GITHUB_TOKEN
 ```
 
-If it is empty, export it before running `forge deploy`:
+If it is empty, export it before running `forgeai deploy`:
 
 ```bash
 export GITHUB_TOKEN="ghp_..."
-forge deploy --env dev
+forgeai deploy --env dev
 ```
 
 ---
@@ -199,7 +199,7 @@ Set the variable before deploying:
 
 ```bash
 export ANTHROPIC_API_KEY="sk-ant-..."
-forge deploy --env dev
+forgeai deploy --env dev
 ```
 
 In CI, add the key as a secret (see [CI/CD Integration](./ci-cd.md)).
@@ -245,11 +245,11 @@ To reset Forge to a clean state, delete the `.forge/` directory:
 rm -rf .forge/
 ```
 
-The next `forge deploy` treats the deployment as a fresh create. This does not affect running agents or external services.
+The next `forgeai deploy` treats the deployment as a fresh create. This does not affect running agents or external services.
 
 ### State conflicts between environments
 
-Each `forge deploy --env <name>` writes to the same `.forge/state.json` file. If you deploy to `dev` and then immediately deploy to `production`, the state file reflects only the production deployment. A subsequent `forge diff` compares against the production state, not the dev state.
+Each `forgeai deploy --env <name>` writes to the same `.forge/state.json` file. If you deploy to `dev` and then immediately deploy to `production`, the state file reflects only the production deployment. A subsequent `forgeai diff` compares against the production state, not the dev state.
 
 To maintain separate state per environment, run deployments from separate directories or use CI pipelines with isolated workspaces. In CI, each job gets its own working directory, so state files do not conflict.
 

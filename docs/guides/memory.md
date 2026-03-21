@@ -63,7 +63,7 @@ memory:
 **Step 3: Deploy.**
 
 ```bash
-forge deploy
+forgeai deploy
 ```
 
 Forge will show the memory configuration in the plan:

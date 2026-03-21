@@ -1,6 +1,6 @@
 {
   "name": "@openforge-ai/adapters",
-  "version": "0.2.3",
+  "version": "0.2.5",
   "description": "LLM provider adapters for Forge agent infrastructure",
   "type": "module",
   "license": "MIT",

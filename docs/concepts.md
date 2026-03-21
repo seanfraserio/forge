@@ -6,7 +6,7 @@ Forge treats AI agent configuration as infrastructure. Like Terraform manages cl
 
 ## Idempotency
 
-Every `forge deploy` is idempotent. Running it twice with the same config produces the same result. Forge achieves this by:
+Every `forgeai deploy` is idempotent. Running it twice with the same config produces the same result. Forge achieves this by:
 
 1. Hashing the normalized config (SHA-256)
 2. Comparing the hash against `.forge/state.json`
@@ -20,11 +20,11 @@ Inspired by Terraform:
 2. **Review** — The diff is shown to the user for confirmation
 3. **Apply** — Changes are applied and state is written
 
-Use `forge diff` to preview changes without applying. Use `--dry-run` with `forge deploy` for the same effect.
+Use `forgeai diff` to preview changes without applying. Use `--dry-run` with `forgeai deploy` for the same effect.
 
 ## Adapters
 
-Adapters are the bridge between Forge's declarative configuration and the runtime platform where an agent actually executes. When you run `forge deploy`, Forge reads `forge.yaml`, computes the plan, and then hands the resolved config to an adapter that knows how to turn it into a running agent.
+Adapters are the bridge between Forge's declarative configuration and the runtime platform where an agent actually executes. When you run `forgeai deploy`, Forge reads `forge.yaml`, computes the plan, and then hands the resolved config to an adapter that knows how to turn it into a running agent.
 
 Forge ships with two deployment adapters:
 
@@ -53,19 +53,19 @@ The state file is a JSON object with four top-level fields:
 
 ### How config hashing ensures idempotency
 
-Every `forge deploy` computes the hash of the desired config and compares it against the `configHash` stored in state. If the hashes match, Forge reports "no changes" and exits without side effects. This makes deployments safe to retry and safe to run on every CI push -- duplicate deploys are no-ops.
+Every `forgeai deploy` computes the hash of the desired config and compares it against the `configHash` stored in state. If the hashes match, Forge reports "no changes" and exits without side effects. This makes deployments safe to retry and safe to run on every CI push -- duplicate deploys are no-ops.
 
 The hashing is deterministic: rearranging keys in `forge.yaml` without changing values produces the same hash. Changing any value -- even whitespace in a system prompt -- produces a different hash and triggers a redeployment.
 
 ### How environments interact with state
 
-Environment overrides are applied before hashing. When you run `forge deploy --env production`, Forge merges the `production` overrides onto the base config, hashes the merged result, and stores that merged config in state. This means the state file always reflects the fully resolved config for the last-deployed environment.
+Environment overrides are applied before hashing. When you run `forgeai deploy --env production`, Forge merges the `production` overrides onto the base config, hashes the merged result, and stores that merged config in state. This means the state file always reflects the fully resolved config for the last-deployed environment.
 
 Because state is a single file, deploying to different environments from the same directory overwrites the previous state. In CI this is not a problem because each job runs in an isolated workspace. For local development, be aware that switching between `--env dev` and `--env production` replaces the state each time.
 
 ### What rollback actually does
 
-`forge rollback` reads the previous config from `.forge/state.json`, re-runs the plan/apply cycle with that config as the desired state, and writes the result back to state. It does not maintain a history of past deployments -- it restores the single previous snapshot. If you need deeper rollback history, use the enterprise `AuditTrail` module, which maintains an append-only log of every deployment in `.forge/audit.jsonl`.
+`forgeai rollback` reads the previous config from `.forge/state.json`, re-runs the plan/apply cycle with that config as the desired state, and writes the result back to state. It does not maintain a history of past deployments -- it restores the single previous snapshot. If you need deeper rollback history, use the enterprise `AuditTrail` module, which maintains an append-only log of every deployment in `.forge/audit.jsonl`.
 
 Add `.forge/` to `.gitignore` -- state is local to each deployment target.
 
@@ -92,7 +92,7 @@ Forge is one piece of a three-project system designed for production AI agent in
 
 Together they form a complete lifecycle: Forge deploys agents, Bastion mediates their API access, and Lantern gives you visibility into what they are doing. Each project works independently, but they are designed to complement each other. A typical production setup looks like:
 
-1. Define agents in `forge.yaml` and deploy with `forge deploy`
+1. Define agents in `forge.yaml` and deploy with `forgeai deploy`
 2. Route all agent traffic through Bastion for centralized auth and logging
 3. Monitor agent behavior and costs in Lantern
 

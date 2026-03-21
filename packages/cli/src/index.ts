@@ -1,4 +1,3 @@
-#!/usr/bin/env node
 import { Command } from "commander";
 import { deployCommand } from "./commands/deploy.js";
 import { diffCommand } from "./commands/diff.js";
@@ -8,9 +7,9 @@ import { validateCommand } from "./commands/validate.js";
 const program = new Command();
 
 program
-  .name("forge")
+  .name("forgeai")
   .description("Agent infrastructure as code — the Terraform for AI agents")
-  .version("0.1.0");
+  .version("0.2.5");
 
 program
   .command("deploy")

@@ -1,6 +1,6 @@
 {
   "name": "@openforge-ai/cli",
-  "version": "0.2.3",
+  "version": "0.2.5",
   "description": "Agent infrastructure as code \u2014 the Terraform for AI agents",
   "type": "module",
   "license": "MIT",
@@ -25,7 +25,7 @@
     "terraform"
   ],
   "bin": {
-    "forge": "./dist/index.js"
+    "forgeai": "./dist/index.js"
   },
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",

@@ -23,12 +23,12 @@ npx @openforge-ai/cli validate
 **Homebrew** (macOS/Linux):
 ```bash
 brew tap seanfraserio/tap
-brew install forge
+brew install forgeai
 ```
 
 Verify the installation:
 ```bash
-forge --version
+forgeai --version
 ```
 
 ## Create your first agent
@@ -58,19 +58,19 @@ memory:
 ## Validate
 
 ```bash
-forge validate
+forgeai validate
 ```
 
 ## Deploy
 
 ```bash
-forge deploy --env dev
+forgeai deploy --env dev
 ```
 
 ## Check what would change
 
 ```bash
-forge diff
+forgeai diff
 ```
 
 ## Next steps

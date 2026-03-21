@@ -27,7 +27,7 @@ jobs:
         with:
           node-version: "20"
       - run: npm install -g @openforge-ai/cli
-      - run: forge validate
+      - run: forgeai validate
 
   deploy-dev:
     needs: validate
@@ -39,7 +39,7 @@ jobs:
         with:
           node-version: "20"
       - run: npm install -g @openforge-ai/cli
-      - run: forge deploy --env dev
+      - run: forgeai deploy --env dev
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
@@ -55,7 +55,7 @@ jobs:
         with:
           node-version: "20"
       - run: npm install -g @openforge-ai/cli
-      - run: forge deploy --env production
+      - run: forgeai deploy --env production
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
@@ -79,14 +79,14 @@ validate:
   image: node:20-alpine
   script:
     - npm install -g @openforge-ai/cli
-    - forge validate
+    - forgeai validate
 
 deploy-dev:
   stage: deploy-dev
   image: node:20-alpine
   script:
     - npm install -g @openforge-ai/cli
-    - forge deploy --env dev
+    - forgeai deploy --env dev
   variables:
     ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY
   only:
@@ -97,7 +97,7 @@ deploy-production:
   image: node:20-alpine
   script:
     - npm install -g @openforge-ai/cli
-    - forge deploy --env production
+    - forgeai deploy --env production
   variables:
     ANTHROPIC_API_KEY: $ANTHROPIC_API_KEY
   when: manual
@@ -134,13 +134,13 @@ jobs:
 
       - name: Deploy to dev
         if: github.ref == 'refs/heads/dev'
-        run: forge deploy --env dev
+        run: forgeai deploy --env dev
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
       - name: Deploy to production
         if: github.ref == 'refs/heads/main'
-        run: forge deploy --env production
+        run: forgeai deploy --env production
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
@@ -154,9 +154,9 @@ deploy:
     - npm install -g @openforge-ai/cli
     - |
       if [ "$CI_COMMIT_BRANCH" = "dev" ]; then
-        forge deploy --env dev
+        forgeai deploy --env dev
       elif [ "$CI_COMMIT_BRANCH" = "main" ]; then
-        forge deploy --env production
+        forgeai deploy --env production
       fi
 ```
 
@@ -184,7 +184,7 @@ deploy-production:
       with:
         node-version: "20"
     - run: npm install -g @openforge-ai/cli
-    - run: forge deploy --env production
+    - run: forgeai deploy --env production
       env:
         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
@@ -199,7 +199,7 @@ Set `when: manual` on the production stage (shown in the GitLab CI example above
 
 ## Rollback in CI
 
-To trigger a rollback from CI, run `forge rollback` in your pipeline.
+To trigger a rollback from CI, run `forgeai rollback` in your pipeline.
 
 ### Manual rollback workflow (GitHub Actions)
 
@@ -229,7 +229,7 @@ jobs:
         with:
           node-version: "20"
       - run: npm install -g @openforge-ai/cli
-      - run: forge rollback --env ${{ inputs.environment }}
+      - run: forgeai rollback --env ${{ inputs.environment }}
         env:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 ```
@@ -253,13 +253,13 @@ deploy-production:
 
     - name: Deploy
       id: deploy
-      run: forge deploy --env production
+      run: forgeai deploy --env production
       env:
         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 
     - name: Rollback on failure
       if: failure() && steps.deploy.outcome == 'failure'
-      run: forge rollback --env production
+      run: forgeai rollback --env production
       env:
         ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
 ```

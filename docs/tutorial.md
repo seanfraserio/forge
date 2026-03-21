@@ -22,7 +22,7 @@ npm install -g @openforge-ai/cli
 Verify the installation:
 
 ```bash
-forge --version
+forgeai --version
 ```
 
 You should see output like:
@@ -69,7 +69,7 @@ Notice that the configuration declares everything about the agent in one place: 
 Before deploying, we will check that the configuration is valid. Run:
 
 ```bash
-forge validate
+forgeai validate
 ```
 
 You'll see:
@@ -92,7 +92,7 @@ If there were any problems -- a missing required field, an invalid model provide
 Now we will deploy the agent. Run:
 
 ```bash
-forge deploy
+forgeai deploy
 ```
 
 Forge reads `forge.yaml`, checks for any existing state, generates a plan, and shows you what will happen:
@@ -152,7 +152,7 @@ You'll see something like:
 
 This state file records exactly what was deployed, when, and to which environment. Forge uses it on the next deploy to compute a diff. Add `.forge/` to your `.gitignore` -- state is local to each deployment target.
 
-If you run `forge deploy` again without changing anything, Forge detects that the config hash matches and reports:
+If you run `forgeai deploy` again without changing anything, Forge detects that the config hash matches and reports:
 
 ```
 No changes. Infrastructure is up to date.
@@ -176,7 +176,7 @@ model:
 Before deploying, preview what would change using the `diff` command:
 
 ```bash
-forge diff
+forgeai diff
 ```
 
 You'll see:
@@ -194,7 +194,7 @@ Notice the `~` prefix -- this indicates an update to an existing resource, not a
 Now apply the change:
 
 ```bash
-forge deploy
+forgeai deploy
 ```
 
 ```
@@ -250,7 +250,7 @@ Remove (or replace) the `inline:` line entirely. The `system_prompt` section acc
 Deploy the change:
 
 ```bash
-forge deploy
+forgeai deploy
 ```
 
 ```
@@ -308,7 +308,7 @@ Notice that each environment only overrides the fields it needs to change. The `
 Deploy to the dev environment (this is the default):
 
 ```bash
-forge deploy
+forgeai deploy
 ```
 
 ```
@@ -326,7 +326,7 @@ Plan: 0 to add, 1 to change, 0 to destroy.
 Now deploy to production:
 
 ```bash
-forge deploy --env production
+forgeai deploy --env production
 ```
 
 ```
@@ -347,7 +347,7 @@ Notice that production shows CREATE operations because it has never been deploye
 You can also preview what would change in a specific environment without deploying:
 
 ```bash
-forge diff --env production
+forgeai diff --env production
 ```
 
 ## Add an MCP server
@@ -400,7 +400,7 @@ mkdir -p data
 Deploy the change:
 
 ```bash
-forge deploy
+forgeai deploy
 ```
 
 ```
@@ -420,13 +420,13 @@ The MCP server is now part of your agent's configuration. When the agent runs, i
 
 In this tutorial, you walked through the complete Forge workflow:
 
-1. **Validate** -- `forge validate` checks your configuration for errors before you deploy.
-2. **Deploy** -- `forge deploy` computes a plan, shows you what will change, and applies it. State is tracked in `.forge/state.json`.
-3. **Diff** -- `forge diff` previews changes without applying them. Use it to review before deploying.
+1. **Validate** -- `forgeai validate` checks your configuration for errors before you deploy.
+2. **Deploy** -- `forgeai deploy` computes a plan, shows you what will change, and applies it. State is tracked in `.forge/state.json`.
+3. **Diff** -- `forgeai diff` previews changes without applying them. Use it to review before deploying.
 4. **Environments** -- The `environments` section lets you override model settings per deployment target. Deploy with `--env` to target a specific environment.
 5. **Tools** -- MCP servers give your agent capabilities. Declare them in the `tools` section of `forge.yaml`.
 
-Every change follows the same cycle: edit `forge.yaml`, run `forge diff` to review, run `forge deploy` to apply. The process is idempotent and auditable.
+Every change follows the same cycle: edit `forge.yaml`, run `forgeai diff` to review, run `forgeai deploy` to apply. The process is idempotent and auditable.
 
 ## Next steps
 

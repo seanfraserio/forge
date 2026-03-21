@@ -46,7 +46,7 @@ If you deploy without specifying an environment, Forge defaults to `dev`. If no 
 Use the `--env` flag (or its short form `-e`) to target an environment:
 
 ```bash
-forge deploy --env production
+forgeai deploy --env production
 ```
 
 Forge resolves the environment overrides and displays the effective configuration:
@@ -136,10 +136,10 @@ This keeps development simple (in-context memory, no external dependencies) whil
 
 ## View environment-specific diff
 
-To preview what would change in a specific environment without deploying, use `forge diff` with the `--env` flag:
+To preview what would change in a specific environment without deploying, use `forgeai diff` with the `--env` flag:
 
 ```bash
-forge diff --env production
+forgeai diff --env production
 ```
 
 This compares your current `forge.yaml` (with production overrides resolved) against the last state deployed to the `production` environment. If production has never been deployed, every resource appears as a CREATE.
@@ -153,15 +153,15 @@ A common workflow promotes changes through environments in order: `dev` first, t
 1. Make changes to `forge.yaml`.
 2. Deploy to dev and test:
    ```bash
-   forge deploy --env dev
+   forgeai deploy --env dev
    ```
 3. When satisfied, deploy to staging:
    ```bash
-   forge deploy --env staging
+   forgeai deploy --env staging
    ```
 4. After staging validation, deploy to production:
    ```bash
-   forge deploy --env production
+   forgeai deploy --env production
    ```
 
 Because `forge.yaml` is a single source of truth checked into version control, every environment deployment uses the same base config. Differences between environments come only from the overrides you explicitly define.
@@ -173,19 +173,19 @@ To enforce promotion order in a team setting, use branch protection rules in you
 Forge commands are designed to run in CI/CD pipelines. Use `--auto-approve` to skip the confirmation prompt in automated environments:
 
 ```bash
-forge deploy --env production --auto-approve
+forgeai deploy --env production --auto-approve
 ```
 
 Use `--dry-run` to validate what would change without applying, suitable for PR checks:
 
 ```bash
-forge deploy --env production --dry-run
+forgeai deploy --env production --dry-run
 ```
 
 A typical pipeline structure:
 
-- **On pull request**: run `forge validate` and `forge deploy --dry-run --env production` to catch config errors and preview changes.
-- **On merge to main**: run `forge deploy --env staging --auto-approve`.
-- **On release tag**: run `forge deploy --env production --auto-approve`.
+- **On pull request**: run `forgeai validate` and `forgeai deploy --dry-run --env production` to catch config errors and preview changes.
+- **On merge to main**: run `forgeai deploy --env staging --auto-approve`.
+- **On release tag**: run `forgeai deploy --env production --auto-approve`.
 
 For a complete CI/CD setup, see the [Enterprise Integration Guide](../enterprise-integration-guide.md).

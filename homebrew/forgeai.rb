@@ -2,9 +2,9 @@
 # This is a reference template — the live formula is auto-managed in
 # seanfraserio/homebrew-tap via the brew-release GitHub Actions workflow.
 #
-# Install: brew tap seanfraserio/tap && brew install forge
+# Install: brew tap seanfraserio/tap && brew install forgeai
 
-class Forge < Formula
+class Forgeai < Formula
   desc "Agent infrastructure as code — the Terraform for AI agents"
   homepage "https://github.com/seanfraserio/forge"
   url "https://registry.npmjs.org/@openforge-ai/cli/-/cli-0.2.0.tgz"
@@ -19,6 +19,6 @@ class Forge < Formula
   end
 
   test do
-    assert_match version.to_s, shell_output("#{bin}/forge --version")
+    assert_match version.to_s, shell_output("#{bin}/forgeai --version")
   end
 end

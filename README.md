@@ -21,7 +21,7 @@ npx @openforge-ai/cli validate -c forge.yaml
 **Homebrew** (macOS/Linux):
 ```bash
 brew tap seanfraserio/tap
-brew install forge
+brew install forgeai
 ```
 
 ## Quickstart
@@ -48,16 +48,16 @@ memory:
 ```
 
 ```bash
-forge validate          # Check config syntax
-forge diff              # Preview changes
-forge deploy --env dev  # Deploy the agent
+forgeai validate          # Check config syntax
+forgeai diff              # Preview changes
+forgeai deploy --env dev  # Deploy the agent
 ```
 
 ## Core Concepts
 
 - **Agent as Code** — Every agent property lives in a `forge.yaml` file under version control.
-- **Idempotent deploys** — Running `forge deploy` twice with the same config is a no-op.
-- **Plan/Apply cycle** — Preview changes with `forge diff`, then apply with `forge deploy`.
+- **Idempotent deploys** — Running `forgeai deploy` twice with the same config is a no-op.
+- **Plan/Apply cycle** — Preview changes with `forgeai diff`, then apply with `forgeai deploy`.
 - **Environment overrides** — Define dev, staging, and production variants in one file.
 - **MCP server management** — Declare MCP tool servers alongside your agent config.
 

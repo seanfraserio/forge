@@ -17,7 +17,7 @@ npx @openforge-ai/cli validate -c forge.yaml
 **Homebrew** (macOS/Linux):
 ```bash
 brew tap seanfraserio/tap
-brew install forge
+brew install forgeai
 ```
 
 ## Quickstart
@@ -47,14 +47,14 @@ memory:
 Then run:
 
 ```bash
-forge validate          # Check config syntax and model compatibility
-forge diff              # Preview changes against deployed state
-forge deploy --env dev  # Deploy the agent
+forgeai validate          # Check config syntax and model compatibility
+forgeai diff              # Preview changes against deployed state
+forgeai deploy --env dev  # Deploy the agent
 ```
 
 ## Commands
 
-### `forge validate`
+### `forgeai validate`
 
 Validates a `forge.yaml` file: schema structure, model name compatibility with the declared provider, and environment override correctness.
 
@@ -62,7 +62,7 @@ Validates a `forge.yaml` file: schema structure, model name compatibility with t
 |---|---|---|
 | `-c, --config <path>` | `forge.yaml` | Path to config file |
 
-### `forge diff`
+### `forgeai diff`
 
 Compares local config against the last deployed state in `.forge/state.json`. Outputs a colored diff of what would change on deploy.
 
@@ -71,7 +71,7 @@ Compares local config against the last deployed state in `.forge/state.json`. Ou
 | `-c, --config <path>` | `forge.yaml` | Path to config file |
 | `-e, --env <environment>` | `dev` | Target environment |
 
-### `forge deploy`
+### `forgeai deploy`
 
 Resolves environment overrides, generates a plan, and applies changes. Writes state to `.forge/state.json` on success. Supports pre/post deploy hooks declared in `forge.yaml`.
 
@@ -83,7 +83,7 @@ Resolves environment overrides, generates a plan, and applies changes. Writes st
 | `--dry-run` | `false` | Show plan without applying |
 | `--allow-hooks` | `false` | Allow pre_deploy/post_deploy hook execution |
 
-### `forge rollback`
+### `forgeai rollback`
 
 Displays current deployment state. Rollback to a specific state hash is planned but not yet implemented.
 

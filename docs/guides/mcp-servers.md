@@ -18,7 +18,7 @@ tools:
 - **command** -- The executable to run (e.g., `npx`, `node`, `python`).
 - **args** -- An array of command-line arguments passed to the command.
 
-After adding a server, run `forge deploy` to apply the change. Forge will show `+ Add MCP server "filesystem"` in the plan output.
+After adding a server, run `forgeai deploy` to apply the change. Forge will show `+ Add MCP server "filesystem"` in the plan output.
 
 ## Pass environment variables
 
@@ -40,7 +40,7 @@ To set the variable before deploying:
 
 ```bash
 export BRAVE_API_KEY="your-api-key-here"
-forge deploy
+forgeai deploy
 ```
 
 ## Configure multiple servers
@@ -178,7 +178,7 @@ If the MCP server fails because an environment variable is missing, make sure yo
 
 ```bash
 export BRAVE_API_KEY="your-key"
-forge deploy
+forgeai deploy
 ```
 
 **Server starts but the agent cannot use its tools**

@@ -8,10 +8,10 @@
 
 - [CLI (`@openforge-ai/cli`)](#cli-openforge-aicli)
   - [Commands](#commands)
-    - [`forge validate`](#forge-validate)
-    - [`forge diff`](#forge-diff)
-    - [`forge deploy`](#forge-deploy)
-    - [`forge rollback`](#forge-rollback)
+    - [`forgeai validate`](#forgeai-validate)
+    - [`forgeai diff`](#forgeai-diff)
+    - [`forgeai deploy`](#forgeai-deploy)
+    - [`forgeai rollback`](#forgeai-rollback)
   - [Configuration: `forge.yaml`](#configuration-forgeyaml)
     - [Top-Level Fields](#top-level-fields)
     - [`agent`](#agent)
@@ -76,12 +76,12 @@ npm install -g @openforge-ai/cli
 
 ---
 
-#### `forge validate`
+#### `forgeai validate`
 
 Validate a `forge.yaml` configuration file against the schema.
 
 ```bash
-forge validate [options]
+forgeai validate [options]
 ```
 
 **Options**
@@ -108,20 +108,20 @@ forge validate [options]
 
 ```bash
 # Validate the default forge.yaml in current directory
-forge validate
+forgeai validate
 
 # Validate a specific config file
-forge validate --config ./agents/researcher/forge.yaml
+forgeai validate --config ./agents/researcher/forge.yaml
 ```
 
 ---
 
-#### `forge diff`
+#### `forgeai diff`
 
 Show what would change between the configuration file and the currently deployed state.
 
 ```bash
-forge diff [options]
+forgeai diff [options]
 ```
 
 **Options**
@@ -153,23 +153,23 @@ forge diff [options]
 
 ```bash
 # Diff against dev environment
-forge diff
+forgeai diff
 
 # Diff against production
-forge diff --env production
+forgeai diff --env production
 
 # Diff a specific config
-forge diff --config agents/writer.yaml --env staging
+forgeai diff --config agents/writer.yaml --env staging
 ```
 
 ---
 
-#### `forge deploy`
+#### `forgeai deploy`
 
 Deploy an agent from a `forge.yaml` configuration.
 
 ```bash
-forge deploy [options]
+forgeai deploy [options]
 ```
 
 **Options**
@@ -206,28 +206,28 @@ forge deploy [options]
 
 ```bash
 # Interactive deploy to dev
-forge deploy
+forgeai deploy
 
 # Deploy to production with auto-approve
-forge deploy --env production --auto-approve
+forgeai deploy --env production --auto-approve
 
 # Preview what would happen
-forge deploy --dry-run
+forgeai deploy --dry-run
 
 # Deploy with hooks enabled
-forge deploy --auto-approve --allow-hooks
+forgeai deploy --auto-approve --allow-hooks
 ```
 
 ---
 
-#### `forge rollback`
+#### `forgeai rollback`
 
 Roll back to a previous deployment state.
 
 > **Not yet implemented.** Currently displays current state and reports that state history tracking is not available.
 
 ```bash
-forge rollback [options]
+forgeai rollback [options]
 ```
 
 **Options**
@@ -254,10 +254,10 @@ forge rollback [options]
 
 ```bash
 # Show current state
-forge rollback
+forgeai rollback
 
 # Attempt rollback (not yet implemented)
-forge rollback --target a1b2c3d4e5f6
+forgeai rollback --target a1b2c3d4e5f6
 ```
 
 ---
@@ -1737,7 +1737,7 @@ All state files are stored in the `.forge/` directory (configurable via `stateDi
 
 ### `.forge/state.json`
 
-Stores the current deployed agent state. Written after every successful `forge deploy`. Read by `forge deploy`, `forge diff`, and `forge rollback`.
+Stores the current deployed agent state. Written after every successful `forgeai deploy`. Read by `forgeai deploy`, `forgeai diff`, and `forgeai rollback`.
 
 **Schema:**
 
@@ -1773,9 +1773,9 @@ Stores the current deployed agent state. Written after every successful `forge d
 | `agentName` | `string` | Agent name from config. |
 | `config` | `ForgeConfig` | Full config snapshot. MCP server `env` values are redacted to `"[REDACTED]"` unless they are `${VAR}` template references (which are preserved for accurate diffing). |
 
-**When written:** After every successful `forge deploy` (not on dry-run).
+**When written:** After every successful `forgeai deploy` (not on dry-run).
 
-**When read:** At the start of `forge deploy`, `forge diff`, and `forge rollback` to determine current state.
+**When read:** At the start of `forgeai deploy`, `forgeai diff`, and `forgeai rollback` to determine current state.
 
 ---
 
