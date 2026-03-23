@@ -1,11 +1,6 @@
 import { describe, it, expect } from "vitest";
 import type {
   ForgeConfig,
-  AgentConfig,
-  ModelConfig,
-  SystemPromptConfig,
-  ToolsConfig,
-  McpServerConfig,
   MemoryConfig,
   AgentState,
   PlanResult,

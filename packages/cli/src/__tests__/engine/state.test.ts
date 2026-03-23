@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { hashConfig, readState, writeState, createState } from "../../engine/state.js";
-import type { ForgeConfig, AgentState } from "@openforge-ai/sdk";
+import type { ForgeConfig } from "@openforge-ai/sdk";
 
 const baseConfig: ForgeConfig = {
   version: "1",

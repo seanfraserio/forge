@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import type { AgentState, ForgeConfig } from "@openforge-ai/sdk";
+import { describe, it, expect } from "vitest";
+import type { ForgeConfig } from "@openforge-ai/sdk";
 import { readState, writeState } from "../../engine/state.js";
 import { hashConfig, createState } from "../../engine/state.js";
 

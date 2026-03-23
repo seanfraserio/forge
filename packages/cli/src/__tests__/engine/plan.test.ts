@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { plan, formatPlan } from "../../engine/planner.js";
-import { createState, hashConfig } from "../../engine/state.js";
+import { createState } from "../../engine/state.js";
 import type { ForgeConfig, AgentState } from "@openforge-ai/sdk";
 
 const baseConfig: ForgeConfig = {

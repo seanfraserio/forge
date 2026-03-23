@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { plan } from "../../engine/planner.js";
-import { createState, hashConfig, writeState, readState } from "../../engine/state.js";
+import { createState, hashConfig, readState } from "../../engine/state.js";
 import { apply } from "../../engine/applier.js";
 import type { ForgeConfig } from "@openforge-ai/sdk";
 
