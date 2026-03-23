@@ -89,25 +89,6 @@ importers:
         specifier: ^1.4.0
         version: 1.6.1(@types/node@20.19.37)
 
-  packages/enterprise:
-    dependencies:
-      '@openforge-ai/sdk':
-        specifier: workspace:*
-        version: link:../sdk
-    devDependencies:
-      '@types/node':
-        specifier: ^20.0.0
-        version: 20.19.37
-      tsup:
-        specifier: ^8.0.0
-        version: 8.5.1(postcss@8.5.8)(typescript@5.9.3)(yaml@2.8.2)
-      typescript:
-        specifier: ^5.4.0
-        version: 5.9.3
-      vitest:
-        specifier: ^1.4.0
-        version: 1.6.1(@types/node@20.19.37)
-
   packages/sdk:
     devDependencies:
       tsup:
