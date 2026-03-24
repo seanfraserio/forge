@@ -1,4 +1,5 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, afterEach } from "vitest";
+import { rm } from "node:fs/promises";
 import { hashConfig, readState, writeState, createState } from "../../engine/state.js";
 import type { ForgeConfig } from "@openforge-ai/sdk";
 
@@ -7,6 +8,13 @@ const baseConfig: ForgeConfig = {
   agent: { name: "test-agent", description: "A test agent" },
   model: { provider: "anthropic", name: "claude-sonnet-4-5-20251001", temperature: 0.7 },
 };
+
+const tmpDirs: string[] = [];
+
+afterEach(async () => {
+  await Promise.all(tmpDirs.map(d => rm(d, { recursive: true, force: true }).catch(() => {})));
+  tmpDirs.length = 0;
+});
 
 describe("hashConfig", () => {
   it("produces a 64-char hex string", () => {
@@ -59,6 +67,7 @@ describe("readState", () => {
   it("returns null for invalid JSON", async () => {
     const { writeFile, mkdir } = await import("node:fs/promises");
     const tmpDir = `/tmp/forge-bad-json-${Date.now()}`;
+    tmpDirs.push(tmpDir);
     await mkdir(tmpDir, { recursive: true });
     await writeFile(`${tmpDir}/state.json`, "not-valid-json");
     const result = await readState(tmpDir);
@@ -68,6 +77,7 @@ describe("readState", () => {
   it("returns null for structurally invalid state", async () => {
     const { writeFile, mkdir } = await import("node:fs/promises");
     const tmpDir = `/tmp/forge-invalid-state-${Date.now()}`;
+    tmpDirs.push(tmpDir);
     await mkdir(tmpDir, { recursive: true });
     await writeFile(`${tmpDir}/state.json`, JSON.stringify({ foo: "bar" }));
     const result = await readState(tmpDir);
@@ -78,6 +88,7 @@ describe("readState", () => {
 describe("writeState and readState roundtrip", () => {
   it("persists and loads state correctly", async () => {
     const tmpDir = `/tmp/forge-state-test-${Date.now()}`;
+    tmpDirs.push(tmpDir);
     const state = createState(baseConfig, "production");
     await writeState(tmpDir, state);
     const loaded = await readState(tmpDir);
@@ -89,6 +100,7 @@ describe("writeState and readState roundtrip", () => {
 
   it("creates directory if missing", async () => {
     const tmpDir = `/tmp/forge-mkdir-test-${Date.now()}/nested/dir`;
+    tmpDirs.push(tmpDir);
     const state = createState(baseConfig, "dev");
     await expect(writeState(tmpDir, state)).resolves.not.toThrow();
     const loaded = await readState(tmpDir);
@@ -97,6 +109,7 @@ describe("writeState and readState roundtrip", () => {
 
   it("overwrites existing state on re-write", async () => {
     const tmpDir = `/tmp/forge-overwrite-${Date.now()}`;
+    tmpDirs.push(tmpDir);
     const state1 = createState(baseConfig, "dev");
     await writeState(tmpDir, state1);
 
