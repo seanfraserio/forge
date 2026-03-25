@@ -3,32 +3,11 @@ import { resolveEnvironment } from "../parser/validate.js";
 import { loadConfig } from "../parser/load.js";
 import { plan } from "../engine/planner.js";
 import { readState } from "../engine/state.js";
+import { redactValue } from "../utils/redact.js";
 
 export interface DiffCommandOptions {
   config: string;
   env: string;
-}
-
-/**
- * Redact potential secrets from plan item values before displaying.
- * Replaces MCP server env var values with [REDACTED] in display output.
- */
-function redactValue(value: unknown): unknown {
-  if (value === null || value === undefined) return value;
-  if (typeof value !== "object") return value;
-  const obj = value as Record<string, unknown>;
-  // Redact env values in MCP server objects
-  if (obj.env && typeof obj.env === "object") {
-    const redacted = { ...obj, env: { ...obj.env as Record<string, string> } };
-    for (const key of Object.keys(redacted.env as Record<string, string>)) {
-      const val = (redacted.env as Record<string, string>)[key];
-      if (!/^\$\{.+\}$/.test(val)) {
-        (redacted.env as Record<string, string>)[key] = "[REDACTED]";
-      }
-    }
-    return redacted;
-  }
-  return value;
 }
 
 export async function diffCommand(opts: DiffCommandOptions): Promise<void> {

@@ -1,7 +1,6 @@
 import { Command } from "commander";
 import { deployCommand } from "./commands/deploy.js";
 import { diffCommand } from "./commands/diff.js";
-import { rollbackCommand } from "./commands/rollback.js";
 import { validateCommand } from "./commands/validate.js";
 
 const program = new Command();
@@ -38,16 +37,6 @@ program
     return diffCommand({
       config: opts.config,
       env: opts.env,
-    });
-  });
-
-program
-  .command("rollback")
-  .description("Roll back to a previous deployment state")
-  .option("--target <hash>", "Target state hash to roll back to")
-  .action((opts) => {
-    return rollbackCommand({
-      targetHash: opts.target,
     });
   });
 

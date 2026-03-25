@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { z } from "zod";
 import type { AgentState, ForgeConfig } from "@openforge-ai/sdk";
+import { redactConfig } from "../utils/redact.js";
 
 /**
  * Zod schema for validating state.json structure.
@@ -105,27 +106,6 @@ export async function writeState(
     encoding: "utf-8",
     mode: 0o600,
   });
-}
-
-/**
- * Deep-clone a config and redact sensitive values from MCP server env vars.
- */
-export function redactConfig(config: ForgeConfig): ForgeConfig {
-  const cloned = JSON.parse(JSON.stringify(config)) as ForgeConfig;
-  if (cloned.tools?.mcp_servers) {
-    for (const server of cloned.tools.mcp_servers) {
-      if (server.env) {
-        for (const [key, value] of Object.entries(server.env)) {
-          // Keep ${VAR} template references as-is for accurate diffing
-          // Only redact values that appear to be resolved secrets
-          if (!/^\$\{.+\}$/.test(value)) {
-            server.env[key] = "[REDACTED]";
-          }
-        }
-      }
-    }
-  }
-  return cloned;
 }
 
 /**

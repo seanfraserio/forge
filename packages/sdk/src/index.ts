@@ -1,4 +1,3 @@
-export { ForgeClient } from "./client.js";
 export type {
   ForgeConfig,
   AgentConfig,

@@ -36,9 +36,9 @@ hooks:
     - run: "echo deployed"
 `;
     const result = parseForgeYaml(yaml);
-    expect(result.success).toBe(true);
-    expect(result.config?.agent.name).toBe("prod-agent");
-    expect(result.config?.hooks?.pre_deploy?.[0].run).toBe("npm test");
+    if (!result.success) throw new Error("Expected success");
+    expect(result.config.agent.name).toBe("prod-agent");
+    expect(result.config.hooks?.pre_deploy?.[0].run).toBe("npm test");
   });
 
   it("collects multiple errors", () => {
@@ -51,8 +51,8 @@ model:
   name: ""
 `;
     const result = parseForgeYaml(yaml);
-    expect(result.success).toBe(false);
-    expect(result.errors!.length).toBeGreaterThan(1);
+    if (result.success) throw new Error("Expected failure");
+    expect(result.errors.length).toBeGreaterThan(1);
   });
 
   it("error messages identify the field path", () => {
@@ -65,9 +65,9 @@ model:
   name: claude-sonnet-4-5-20251001
 `;
     const result = parseForgeYaml(yaml);
-    expect(result.success).toBe(false);
+    if (result.success) throw new Error("Expected failure");
     // Error should mention agent.name
-    expect(result.errors?.some((e) => e.includes("agent.name"))).toBe(true);
+    expect(result.errors.some((e) => e.includes("agent.name"))).toBe(true);
   });
 
   it("accepts hyphens in agent name", () => {

@@ -27,9 +27,9 @@ export async function loadConfig(configPath: string): Promise<ForgeConfig> {
   }
 
   const result = parseForgeYaml(raw);
-  if (!result.success || !result.config) {
+  if (!result.success) {
     console.error(chalk.red("✗ Validation errors:"));
-    for (const err of result.errors ?? []) {
+    for (const err of result.errors) {
       console.error(chalk.red(`  • ${err}`));
     }
     process.exit(1);

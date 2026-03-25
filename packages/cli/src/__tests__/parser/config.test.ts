@@ -13,9 +13,9 @@ model:
 describe("parseForgeYaml — valid configs", () => {
   it("parses minimal valid config", () => {
     const result = parseForgeYaml(minimalValidYaml);
-    expect(result.success).toBe(true);
-    expect(result.config?.agent.name).toBe("my-agent");
-    expect(result.config?.model.provider).toBe("anthropic");
+    if (!result.success) throw new Error("Expected success");
+    expect(result.config.agent.name).toBe("my-agent");
+    expect(result.config.model.provider).toBe("anthropic");
   });
 
   it("parses all provider types", () => {
@@ -45,9 +45,9 @@ model:
   max_tokens: 2048
 `;
     const result = parseForgeYaml(yaml);
-    expect(result.success).toBe(true);
-    expect(result.config?.model.temperature).toBe(0.7);
-    expect(result.config?.model.max_tokens).toBe(2048);
+    if (!result.success) throw new Error("Expected success");
+    expect(result.config.model.temperature).toBe(0.7);
+    expect(result.config.model.max_tokens).toBe(2048);
   });
 
   it("parses system_prompt with inline", () => {
@@ -62,8 +62,8 @@ system_prompt:
   inline: "You are a helpful assistant."
 `;
     const result = parseForgeYaml(yaml);
-    expect(result.success).toBe(true);
-    expect(result.config?.system_prompt?.inline).toBe("You are a helpful assistant.");
+    if (!result.success) throw new Error("Expected success");
+    expect(result.config.system_prompt?.inline).toBe("You are a helpful assistant.");
   });
 
   it("parses system_prompt with file", () => {
@@ -78,8 +78,8 @@ system_prompt:
   file: prompts/system.txt
 `;
     const result = parseForgeYaml(yaml);
-    expect(result.success).toBe(true);
-    expect(result.config?.system_prompt?.file).toBe("prompts/system.txt");
+    if (!result.success) throw new Error("Expected success");
+    expect(result.config.system_prompt?.file).toBe("prompts/system.txt");
   });
 
   it("parses mcp_servers", () => {
@@ -99,8 +99,8 @@ tools:
         API_KEY: "\${SEARCH_API_KEY}"
 `;
     const result = parseForgeYaml(yaml);
-    expect(result.success).toBe(true);
-    const server = result.config?.tools?.mcp_servers?.[0];
+    if (!result.success) throw new Error("Expected success");
+    const server = result.config.tools?.mcp_servers?.[0];
     expect(server?.name).toBe("search");
     expect(server?.args).toEqual(["-y", "search-server"]);
   });
@@ -119,9 +119,9 @@ memory:
   collection: agent-memory
 `;
     const result = parseForgeYaml(yaml);
-    expect(result.success).toBe(true);
-    expect(result.config?.memory?.type).toBe("vector");
-    expect(result.config?.memory?.provider).toBe("chroma");
+    if (!result.success) throw new Error("Expected success");
+    expect(result.config.memory?.type).toBe("vector");
+    expect(result.config.memory?.provider).toBe("chroma");
   });
 
   it("parses environments block", () => {
@@ -138,16 +138,16 @@ environments:
       temperature: 0.1
 `;
     const result = parseForgeYaml(yaml);
-    expect(result.success).toBe(true);
-    expect(result.config?.environments?.production?.model?.temperature).toBe(0.1);
+    if (!result.success) throw new Error("Expected success");
+    expect(result.config.environments?.production?.model?.temperature).toBe(0.1);
   });
 });
 
 describe("parseForgeYaml — error handling", () => {
   it("rejects invalid YAML syntax", () => {
     const result = parseForgeYaml(":\n  bad: [yaml: here");
-    expect(result.success).toBe(false);
-    expect(result.errors?.[0]).toMatch(/YAML parse error/i);
+    if (result.success) throw new Error("Expected failure");
+    expect(result.errors[0]).toMatch(/YAML parse error/i);
   });
 
   it("rejects missing version", () => {
@@ -170,8 +170,8 @@ model:
   provider: anthropic
   name: claude-sonnet-4-5-20251001
 `);
-    expect(result.success).toBe(false);
-    expect(result.errors?.some((e) => e.toLowerCase().includes("name"))).toBe(true);
+    if (result.success) throw new Error("Expected failure");
+    expect(result.errors.some((e) => e.toLowerCase().includes("name"))).toBe(true);
   });
 
   it("rejects invalid provider", () => {
@@ -211,8 +211,8 @@ model:
 memory:
   type: vector
 `);
-    expect(result.success).toBe(false);
-    expect(result.errors?.some((e) => e.includes("provider"))).toBe(true);
+    if (result.success) throw new Error("Expected failure");
+    expect(result.errors.some((e) => e.includes("provider"))).toBe(true);
   });
 
   it("includes field path in error messages", () => {
@@ -224,13 +224,13 @@ model:
   provider: anthropic
   name: claude-sonnet-4-5-20251001
 `);
-    expect(result.success).toBe(false);
-    expect(result.errors?.some((e) => e.includes("agent"))).toBe(true);
+    if (result.success) throw new Error("Expected failure");
+    expect(result.errors.some((e) => e.includes("agent"))).toBe(true);
   });
 });
 
 describe("resolveEnvironment", () => {
-  const config = parseForgeYaml(`
+  const parsed = parseForgeYaml(`
 version: "1"
 agent:
   name: my-agent
@@ -245,7 +245,9 @@ environments:
   staging:
     model:
       name: claude-haiku-4-5-20251001
-`).config!;
+`);
+  if (!parsed.success) throw new Error("Expected success");
+  const config = parsed.config;
 
   it("returns base config when env not found", () => {
     const resolved = resolveEnvironment(config, "dev");

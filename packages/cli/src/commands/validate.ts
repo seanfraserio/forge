@@ -22,7 +22,7 @@ export async function validateCommand(opts: ValidateCommandOptions): Promise<voi
   const result = parseForgeYaml(raw);
 
   if (result.success) {
-    const config = result.config!;
+    const config = result.config;
 
     // Validate model against the adapter
     const adapter = resolveAdapter(config);
@@ -40,7 +40,7 @@ export async function validateCommand(opts: ValidateCommandOptions): Promise<voi
     }
   } else {
     console.error(chalk.red("✗ Validation failed:"));
-    for (const err of result.errors ?? []) {
+    for (const err of result.errors) {
       console.error(chalk.red(`  • ${err}`));
     }
     process.exit(1);

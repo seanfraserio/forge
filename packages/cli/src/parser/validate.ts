@@ -2,11 +2,9 @@ import { parse as parseYaml } from "yaml";
 import { forgeConfigSchema } from "./schema.js";
 import type { ForgeConfig } from "@openforge-ai/sdk";
 
-export interface ValidationResult {
-  success: boolean;
-  config?: ForgeConfig;
-  errors?: string[];
-}
+export type ValidationResult =
+  | { success: true; config: ForgeConfig }
+  | { success: false; errors: string[] };
 
 export function parseForgeYaml(raw: string): ValidationResult {
   let parsed: unknown;
