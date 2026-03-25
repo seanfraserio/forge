@@ -15,10 +15,10 @@ const agentStateSchema = z.object({
   environment: z.string(),
   agentName: z.string(),
   agentVersion: z.string().optional(),
-  config: z.object({}).passthrough(),
+  config: z.record(z.unknown()),
   endpoint: z.string().optional(),
   agentId: z.string().optional(),
-}).passthrough();
+}).strict();
 
 const STATE_FILE = "state.json";
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -90,6 +90,35 @@ export async function readState(stateDir: string): Promise<AgentState | null> {
 }
 
 /**
+ * Patterns that indicate secrets leaked into state content.
+ * Checked against the serialized JSON before writing to disk.
+ */
+const SECRET_PATTERNS = [
+  /sk-[a-zA-Z0-9]{20,}/,       // OpenAI / Anthropic API keys
+  /ghp_[a-zA-Z0-9]{36}/,       // GitHub personal access tokens
+  /ghs_[a-zA-Z0-9]{36}/,       // GitHub server tokens
+  /glpat-[a-zA-Z0-9\-_]{20,}/, // GitLab PATs
+  /AKIA[0-9A-Z]{16}/,          // AWS access key IDs
+  /Bearer\s+[a-zA-Z0-9\-_.]+/, // Bearer tokens
+  /-----BEGIN\s+(RSA\s+)?PRIVATE\s+KEY/, // PEM private keys
+  /password\s*[:=]\s*\S+/i,    // password assignments
+];
+
+/**
+ * Scan serialized state for leaked secrets. Throws if any pattern matches.
+ */
+function assertNoSecrets(serialized: string): void {
+  for (const pattern of SECRET_PATTERNS) {
+    if (pattern.test(serialized)) {
+      throw new Error(
+        `Refusing to write state: potential secret detected (matched ${pattern.source}). ` +
+        "Ensure all sensitive values are redacted before persisting state."
+      );
+    }
+  }
+}
+
+/**
  * Write the agent state to .forge/state.json.
  * Creates the .forge directory if it doesn't exist.
  */
@@ -99,10 +128,13 @@ export async function writeState(
 ): Promise<void> {
   validateStateDir(stateDir);
   const statePath = join(stateDir, STATE_FILE);
+  const serialized = JSON.stringify(state, null, 2);
+
+  assertNoSecrets(serialized);
 
   await mkdir(stateDir, { recursive: true, mode: 0o700 });
 
-  await writeFile(statePath, JSON.stringify(state, null, 2), {
+  await writeFile(statePath, serialized, {
     encoding: "utf-8",
     mode: 0o600,
   });

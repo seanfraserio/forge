@@ -88,6 +88,10 @@ hooks:
     - run: "echo 'Done'"
 ```
 
+> **Security: Hook Trust Model**
+>
+> Hook `run` commands execute arbitrary shell commands via `/bin/sh -c`. The **forge.yaml author is the trust boundary** — anyone who can modify `forge.yaml` can execute arbitrary code on the deployer's machine. Forge requires the `--allow-hooks` flag as an opt-in gate before executing any hooks. Without this flag, hooks are displayed but skipped. Always review `forge.yaml` from untrusted sources before running `forge deploy --allow-hooks`.
+
 ## deploy
 
 Configures which deployment adapter Forge uses and how it connects to the target platform.

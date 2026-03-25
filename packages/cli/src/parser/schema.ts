@@ -26,9 +26,18 @@ export const systemPromptSchema = z.object({
   { message: "system_prompt.file must be a relative path within the project (no absolute paths or '..')" }
 );
 
+/**
+ * Shell metacharacters that could enable command injection when the command
+ * string is passed to a shell. These are rejected at parse time.
+ */
+const SHELL_METACHAR_PATTERN = /[;|&$()>`<]/;
+
 export const mcpServerSchema = z.object({
   name: z.string().min(1),
-  command: z.string().min(1),
+  command: z.string().min(1).refine(
+    (cmd) => !SHELL_METACHAR_PATTERN.test(cmd),
+    { message: "MCP server command must not contain shell metacharacters (;|&$()>`<)" }
+  ),
   args: z.array(z.string()).optional(),
   env: z.record(z.string()).optional(),
 });

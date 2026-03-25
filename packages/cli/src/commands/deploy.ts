@@ -11,6 +11,19 @@ import type { ApplyOptions } from "@openforge-ai/sdk";
 
 const execFileAsync = promisify(execFile);
 
+/**
+ * Redact common secret patterns from hook output before printing to console.
+ */
+function redactOutput(text: string): string {
+  return text
+    .replace(/password\s*=\s*\S+/gi, "password=[REDACTED]")
+    .replace(/token\s*=\s*\S+/gi, "token=[REDACTED]")
+    .replace(/Bearer\s+[a-zA-Z0-9\-_.]+/g, "Bearer [REDACTED]")
+    .replace(/sk-[a-zA-Z0-9]{20,}/g, "[REDACTED]")
+    .replace(/ghp_[a-zA-Z0-9]{36}/g, "[REDACTED]")
+    .replace(/AKIA[0-9A-Z]{16}/g, "[REDACTED]");
+}
+
 export interface DeployCommandOptions {
   config: string;
   env: string;
@@ -30,16 +43,16 @@ async function confirm(message: string): Promise<boolean> {
 }
 
 async function runHook(command: string, label: string): Promise<void> {
-  console.log(chalk.dim(`  Running ${label}: ${command}`));
+  console.log(chalk.dim(`  Running ${label}: ${redactOutput(command)}`));
   try {
     const { stdout, stderr } = await execFileAsync("/bin/sh", ["-c", command], {
       timeout: 60_000,
     });
-    if (stdout.trim()) console.log(chalk.dim(`  ${stdout.trim()}`));
-    if (stderr.trim()) console.warn(chalk.yellow(`  ${stderr.trim()}`));
+    if (stdout.trim()) console.log(chalk.dim(`  ${redactOutput(stdout.trim())}`));
+    if (stderr.trim()) console.warn(chalk.yellow(`  ${redactOutput(stderr.trim())}`));
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
-    throw new Error(`Hook "${label}" failed: ${msg}`);
+    throw new Error(`Hook "${label}" failed: ${redactOutput(msg)}`);
   }
 }
 
