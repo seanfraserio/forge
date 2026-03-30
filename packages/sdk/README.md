@@ -18,11 +18,11 @@ Types that map directly to `forge.yaml` structure:
 - **`AgentConfig`** — Agent name and description
 - **`ModelConfig`** — Provider, model name, temperature, max tokens
 - **`ModelProvider`** — `"anthropic" | "openai" | "google" | "ollama" | "bedrock"`
-- **`SystemPromptConfig`** — Inline string or file path reference
-- **`ToolsConfig`** / **`McpServerConfig`** — MCP server declarations
-- **`MemoryConfig`** — Memory type (`none`, `in-context`, `vector`) and optional provider
-- **`EnvironmentOverride`** — Per-environment model, tools, and memory overrides
-- **`HooksConfig`** / **`HookStep`** — Pre/post deploy shell commands
+- **`SystemPromptConfig`** — Inline string or `{ file: string }` reference
+- **`McpServerConfig`** — MCP server declarations
+- **`MemoryConfig`** — Discriminated union: `none`, `in-context`, or `vector` (with required provider)
+- **`EnvironmentOverride`** — Per-environment model, mcp_servers, and memory overrides
+- **`HooksConfig`** — Pre/post deploy shell commands (string arrays)
 
 ### Engine Types
 

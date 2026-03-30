@@ -1,5 +1,9 @@
-import type { ForgeConfig, AgentState, PlanResult } from "@openforge-ai/sdk";
+import type { ForgeConfig, AgentState, PlanResult, SystemPromptConfig } from "@openforge-ai/sdk";
 import { hashConfig } from "./state.js";
+
+function promptSource(sp: SystemPromptConfig): string {
+  return typeof sp === "string" ? "inline" : sp.file;
+}
 
 /**
  * Compare desired config against actual deployed state.
@@ -30,11 +34,11 @@ export function plan(desired: ForgeConfig, actual: AgentState | null): PlanResul
       result.toCreate.push({
         resource: "system_prompt",
         newValue: desired.system_prompt,
-        summary: `Set system prompt from ${desired.system_prompt.file ?? "inline"}`,
+        summary: `Set system prompt from ${promptSource(desired.system_prompt)}`,
       });
     }
-    if (desired.tools?.mcp_servers) {
-      for (const server of desired.tools.mcp_servers) {
+    if (desired.mcp_servers) {
+      for (const server of desired.mcp_servers) {
         result.toCreate.push({
           resource: "mcp_server",
           field: server.name,
@@ -133,7 +137,7 @@ export function plan(desired: ForgeConfig, actual: AgentState | null): PlanResul
       result.toCreate.push({
         resource: "system_prompt",
         newValue: desired.system_prompt,
-        summary: `Set system prompt from ${desired.system_prompt.file ?? "inline"}`,
+        summary: `Set system prompt from ${promptSource(desired.system_prompt)}`,
       });
     } else if (actualConfig.system_prompt && !desired.system_prompt) {
       result.toDelete.push({
@@ -172,15 +176,15 @@ export function plan(desired: ForgeConfig, actual: AgentState | null): PlanResul
         resource: "memory",
         oldValue: actualConfig.memory,
         newValue: desired.memory,
-        summary: `Update memory: ${desired.memory.type}${desired.memory.provider ? `/${desired.memory.provider}` : ""}`,
+        summary: `Update memory: ${desired.memory.type}${desired.memory.type === "vector" ? `/${desired.memory.provider}` : ""}`,
       });
     }
   }
 
   // MCP servers diff — compare by name and non-env fields to avoid phantom diffs
   // from redacted env values in stored state
-  const desiredServers = desired.tools?.mcp_servers ?? [];
-  const actualServers = actualConfig.tools?.mcp_servers ?? [];
+  const desiredServers = desired.mcp_servers ?? [];
+  const actualServers = actualConfig.mcp_servers ?? [];
   const actualServerMap = new Map(actualServers.map((s) => [s.name, s]));
   const desiredServerMap = new Map(desiredServers.map((s) => [s.name, s]));
 

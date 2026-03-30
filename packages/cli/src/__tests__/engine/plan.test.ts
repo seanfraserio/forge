@@ -25,7 +25,7 @@ describe("plan — no existing state", () => {
   it("creates system_prompt when present", () => {
     const config: ForgeConfig = {
       ...baseConfig,
-      system_prompt: { inline: "You are helpful." },
+      system_prompt: "You are helpful.",
     };
     const result = plan(config, null);
     const resources = result.toCreate.map((i) => i.resource);
@@ -35,7 +35,7 @@ describe("plan — no existing state", () => {
   it("creates mcp_servers when present", () => {
     const config: ForgeConfig = {
       ...baseConfig,
-      tools: { mcp_servers: [{ name: "search", command: "npx search" }] },
+      mcp_servers: [{ name: "search", command: "npx search" }],
     };
     const result = plan(config, null);
     const mcpItems = result.toCreate.filter((i) => i.resource === "mcp_server");
@@ -136,7 +136,7 @@ describe("plan — detecting changes", () => {
     const state = makeState(baseConfig);
     const newConfig: ForgeConfig = {
       ...baseConfig,
-      tools: { mcp_servers: [{ name: "search", command: "npx search" }] },
+      mcp_servers: [{ name: "search", command: "npx search" }],
     };
     const result = plan(newConfig, state);
     const create = result.toCreate.find(
@@ -148,7 +148,7 @@ describe("plan — detecting changes", () => {
   it("detects mcp_server removed", () => {
     const configWithServer: ForgeConfig = {
       ...baseConfig,
-      tools: { mcp_servers: [{ name: "search", command: "npx search" }] },
+      mcp_servers: [{ name: "search", command: "npx search" }],
     };
     const state = makeState(configWithServer);
     const result = plan(baseConfig, state);
@@ -161,12 +161,12 @@ describe("plan — detecting changes", () => {
   it("detects mcp_server updated", () => {
     const configV1: ForgeConfig = {
       ...baseConfig,
-      tools: { mcp_servers: [{ name: "search", command: "npx search-v1" }] },
+      mcp_servers: [{ name: "search", command: "npx search-v1" }],
     };
     const state = makeState(configV1);
     const configV2: ForgeConfig = {
       ...baseConfig,
-      tools: { mcp_servers: [{ name: "search", command: "npx search-v2" }] },
+      mcp_servers: [{ name: "search", command: "npx search-v2" }],
     };
     const result = plan(configV2, state);
     const update = result.toUpdate.find(
@@ -210,7 +210,7 @@ describe("formatPlan", () => {
   it("uses - prefix for deletes", () => {
     const configWithServer: ForgeConfig = {
       ...baseConfig,
-      tools: { mcp_servers: [{ name: "search", command: "cmd" }] },
+      mcp_servers: [{ name: "search", command: "cmd" }],
     };
     const state = makeState(configWithServer);
     const result = plan(baseConfig, state);

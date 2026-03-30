@@ -13,16 +13,15 @@ model:
 system_prompt:
   file: ./prompts/research-system.md
 
-tools:
-  mcp_servers:
-    - name: brave-search
-      command: npx
-      args: ["-y", "@modelcontextprotocol/server-brave-search"]
-      env:
-        BRAVE_API_KEY: "${BRAVE_API_KEY}"
-    - name: filesystem
-      command: npx
-      args: ["-y", "@modelcontextprotocol/server-filesystem", "./workspace"]
+mcp_servers:
+  - name: brave-search
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-brave-search"]
+    env:
+      BRAVE_API_KEY: "${BRAVE_API_KEY}"
+  - name: filesystem
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "./workspace"]
 
 memory:
   type: vector

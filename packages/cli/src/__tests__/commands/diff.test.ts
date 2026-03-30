@@ -25,7 +25,7 @@ describe("diff — detects additions", () => {
     const state = createState(baseConfig, "dev");
     const newConfig: ForgeConfig = {
       ...baseConfig,
-      tools: { mcp_servers: [{ name: "new-server", command: "cmd" }] },
+      mcp_servers: [{ name: "new-server", command: "cmd" }],
     };
     const result = plan(newConfig, state);
     expect(result.hasChanges).toBe(true);
@@ -58,12 +58,12 @@ describe("diff — detects changes", () => {
   it("detects mcp_server update", () => {
     const configV1: ForgeConfig = {
       ...baseConfig,
-      tools: { mcp_servers: [{ name: "srv", command: "cmd-v1" }] },
+      mcp_servers: [{ name: "srv", command: "cmd-v1" }],
     };
     const state = createState(configV1, "dev");
     const configV2: ForgeConfig = {
       ...baseConfig,
-      tools: { mcp_servers: [{ name: "srv", command: "cmd-v2" }] },
+      mcp_servers: [{ name: "srv", command: "cmd-v2" }],
     };
     const result = plan(configV2, state);
     expect(result.toUpdate.some((i) => i.resource === "mcp_server")).toBe(true);
@@ -74,7 +74,7 @@ describe("diff — detects removals", () => {
   it("detects removed mcp_server", () => {
     const configWithServer: ForgeConfig = {
       ...baseConfig,
-      tools: { mcp_servers: [{ name: "old-server", command: "cmd" }] },
+      mcp_servers: [{ name: "old-server", command: "cmd" }],
     };
     const state = createState(configWithServer, "dev");
     const result = plan(baseConfig, state);
@@ -87,25 +87,21 @@ describe("diff — multiple changes together", () => {
   it("captures add + update + delete in single plan", () => {
     const initialConfig: ForgeConfig = {
       ...baseConfig,
-      tools: {
-        mcp_servers: [
-          { name: "keep-me", command: "cmd-v1" },
-          { name: "remove-me", command: "cmd" },
-        ],
-      },
+      mcp_servers: [
+        { name: "keep-me", command: "cmd-v1" },
+        { name: "remove-me", command: "cmd" },
+      ],
     };
     const state = createState(initialConfig, "dev");
 
     const newConfig: ForgeConfig = {
       ...baseConfig,
       agent: { name: "updated-agent" },  // update
-      tools: {
-        mcp_servers: [
-          { name: "keep-me", command: "cmd-v2" }, // update
-          { name: "add-me", command: "new-cmd" }, // create
-          // "remove-me" is gone — delete
-        ],
-      },
+      mcp_servers: [
+        { name: "keep-me", command: "cmd-v2" }, // update
+        { name: "add-me", command: "new-cmd" }, // create
+        // "remove-me" is gone — delete
+      ],
     };
     const result = plan(newConfig, state);
     expect(result.toCreate.some((i) => i.field === "add-me")).toBe(true);

@@ -2,13 +2,16 @@ import type { ModelConfig } from "@openforge-ai/sdk";
 
 // ─── Unified result types ───
 
-export interface DeployResult {
+export interface BaseResult {
   success: boolean;
+  error?: string;
+}
+
+export interface DeployResult extends BaseResult {
   endpoint?: string;
   agentId?: string;
   version?: string;
   status?: string;
-  error?: string;
   metadata?: Record<string, unknown>;
 }
 
@@ -19,10 +22,7 @@ export interface StatusResult {
   metadata?: Record<string, unknown>;
 }
 
-export interface DestroyResult {
-  success: boolean;
-  error?: string;
-}
+export type DestroyResult = BaseResult;
 
 // ─── Adapter interfaces ───
 

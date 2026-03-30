@@ -5,7 +5,7 @@ export interface ForgeConfig {
   agent: AgentConfig;
   model: ModelConfig;
   system_prompt?: SystemPromptConfig;
-  tools?: ToolsConfig;
+  mcp_servers?: McpServerConfig[];
   memory?: MemoryConfig;
   environments?: Record<string, EnvironmentOverride>;
   hooks?: HooksConfig;
@@ -25,14 +25,7 @@ export interface ModelConfig {
 
 export type ModelProvider = "anthropic" | "openai" | "google" | "ollama" | "bedrock";
 
-export interface SystemPromptConfig {
-  file?: string;
-  inline?: string;
-}
-
-export interface ToolsConfig {
-  mcp_servers?: McpServerConfig[];
-}
+export type SystemPromptConfig = string | { file: string };
 
 export interface McpServerConfig {
   name: string;
@@ -41,28 +34,23 @@ export interface McpServerConfig {
   env?: Record<string, string>;
 }
 
-export interface MemoryConfig {
-  type: MemoryType;
-  provider?: MemoryProvider;
-  collection?: string;
-}
+export type MemoryConfig =
+  | { type: "none" }
+  | { type: "in-context" }
+  | { type: "vector"; provider: MemoryProvider; collection?: string };
 
 export type MemoryType = "none" | "in-context" | "vector";
 export type MemoryProvider = "chroma" | "pinecone" | "weaviate";
 
 export interface EnvironmentOverride {
   model?: Partial<ModelConfig>;
-  tools?: ToolsConfig;
+  mcp_servers?: McpServerConfig[];
   memory?: MemoryConfig;
 }
 
 export interface HooksConfig {
-  pre_deploy?: HookStep[];
-  post_deploy?: HookStep[];
-}
-
-export interface HookStep {
-  run: string;
+  pre_deploy?: string[];
+  post_deploy?: string[];
 }
 
 // ─── Engine types ───

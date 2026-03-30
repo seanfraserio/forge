@@ -51,8 +51,8 @@ export function resolveEnvironment(
   if (override.model) {
     resolved.model = { ...resolved.model, ...override.model };
   }
-  if (override.tools) {
-    resolved.tools = override.tools;
+  if (override.mcp_servers) {
+    resolved.mcp_servers = override.mcp_servers;
   }
   if (override.memory) {
     resolved.memory = override.memory;

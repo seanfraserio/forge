@@ -105,15 +105,15 @@ export async function deployCommand(opts: DeployCommandOptions): Promise<void> {
     if (!opts.allowHooks) {
       console.log(chalk.yellow("\n⚠ Hooks detected but --allow-hooks not set:"));
       for (const hook of preHooks) {
-        console.log(chalk.yellow(`  pre_deploy:  ${hook.run}`));
+        console.log(chalk.yellow(`  pre_deploy:  ${hook}`));
       }
       for (const hook of postHooks) {
-        console.log(chalk.yellow(`  post_deploy: ${hook.run}`));
+        console.log(chalk.yellow(`  post_deploy: ${hook}`));
       }
       console.log(chalk.yellow("  Skipping hook execution.\n"));
     } else {
       for (const hook of preHooks) {
-        await runHook(hook.run, "pre_deploy");
+        await runHook(hook, "pre_deploy");
       }
     }
   }
@@ -138,7 +138,7 @@ export async function deployCommand(opts: DeployCommandOptions): Promise<void> {
     // 9. Run post-deploy hooks
     if (opts.allowHooks) {
       for (const hook of postHooks) {
-        await runHook(hook.run, "post_deploy");
+        await runHook(hook, "post_deploy");
       }
     }
   } catch (err) {

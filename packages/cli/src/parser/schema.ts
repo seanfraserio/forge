@@ -9,22 +9,20 @@ export const modelConfigSchema = z.object({
   max_tokens: z.number().int().positive().optional(),
 });
 
-export const systemPromptSchema = z.object({
-  file: z.string().optional(),
-  inline: z.string().optional(),
-}).refine(
-  (data) => data.file || data.inline,
-  { message: "system_prompt must specify either 'file' or 'inline'" }
-).refine(
-  (data) => {
-    if (!data.file) return true;
-    // Reject absolute paths and path traversal
-    if (data.file.startsWith("/") || data.file.startsWith("\\")) return false;
-    if (data.file.includes("..")) return false;
-    return true;
-  },
-  { message: "system_prompt.file must be a relative path within the project (no absolute paths or '..')" }
-);
+export const systemPromptSchema = z.union([
+  z.string().min(1),
+  z.object({
+    file: z.string().min(1).refine(
+      (file) => {
+        // Reject absolute paths and path traversal
+        if (file.startsWith("/") || file.startsWith("\\")) return false;
+        if (file.includes("..")) return false;
+        return true;
+      },
+      { message: "system_prompt.file must be a relative path within the project (no absolute paths or '..')" }
+    ),
+  }),
+]);
 
 /**
  * Shell metacharacters that could enable command injection when the command
@@ -42,9 +40,7 @@ export const mcpServerSchema = z.object({
   env: z.record(z.string()).optional(),
 });
 
-export const toolsConfigSchema = z.object({
-  mcp_servers: z.array(mcpServerSchema).optional(),
-});
+export const mcpServersSchema = z.array(mcpServerSchema).optional();
 
 export const memoryTypeSchema = z.enum(["none", "in-context", "vector"]);
 export const memoryProviderSchema = z.enum(["chroma", "pinecone", "weaviate"]);
@@ -58,18 +54,14 @@ export const memoryConfigSchema = z.object({
   { message: "vector memory type requires a provider" }
 );
 
-export const hookStepSchema = z.object({
-  run: z.string().min(1),
-});
-
 export const hooksConfigSchema = z.object({
-  pre_deploy: z.array(hookStepSchema).optional(),
-  post_deploy: z.array(hookStepSchema).optional(),
+  pre_deploy: z.array(z.string().min(1)).optional(),
+  post_deploy: z.array(z.string().min(1)).optional(),
 });
 
 export const environmentOverrideSchema = z.object({
   model: modelConfigSchema.partial().optional(),
-  tools: toolsConfigSchema.optional(),
+  mcp_servers: mcpServersSchema,
   memory: memoryConfigSchema.optional(),
 });
 
@@ -83,7 +75,7 @@ export const forgeConfigSchema = z.object({
   agent: agentConfigSchema,
   model: modelConfigSchema,
   system_prompt: systemPromptSchema.optional(),
-  tools: toolsConfigSchema.optional(),
+  mcp_servers: mcpServersSchema,
   memory: memoryConfigSchema.optional(),
   environments: z.record(environmentOverrideSchema).optional(),
   hooks: hooksConfigSchema.optional(),

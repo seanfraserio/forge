@@ -4,6 +4,7 @@ export {
 export type {
   AdapterInterface,
   RuntimeAdapter,
+  BaseResult,
   DeployResult,
   StatusResult,
   DestroyResult,

@@ -13,16 +13,15 @@ model:
 system_prompt:
   file: ./prompts/system.md
 
-tools:
-  mcp_servers:
-    - name: filesystem
-      command: npx
-      args: ["-y", "@modelcontextprotocol/server-filesystem", "./data"]
-    - name: brave-search
-      command: npx
-      args: ["-y", "@modelcontextprotocol/server-brave-search"]
-      env:
-        BRAVE_API_KEY: "${BRAVE_API_KEY}"
+mcp_servers:
+  - name: filesystem
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "./data"]
+  - name: brave-search
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-brave-search"]
+    env:
+      BRAVE_API_KEY: "${BRAVE_API_KEY}"
 
 memory:
   type: none
@@ -38,6 +37,6 @@ environments:
 
 hooks:
   pre_deploy:
-    - run: "pnpm test"
+    - "pnpm test"
   post_deploy:
-    - run: "echo 'Deployed $AGENT_NAME to $FORGE_ENV'"
+    - "echo 'Deployed $AGENT_NAME to $FORGE_ENV'"

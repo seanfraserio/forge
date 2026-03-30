@@ -50,7 +50,7 @@ model:
     expect(result.config.model.max_tokens).toBe(2048);
   });
 
-  it("parses system_prompt with inline", () => {
+  it("parses system_prompt with inline string", () => {
     const yaml = `
 version: "1"
 agent:
@@ -58,12 +58,11 @@ agent:
 model:
   provider: anthropic
   name: claude-sonnet-4-5-20251001
-system_prompt:
-  inline: "You are a helpful assistant."
+system_prompt: "You are a helpful assistant."
 `;
     const result = parseForgeYaml(yaml);
     if (!result.success) throw new Error("Expected success");
-    expect(result.config.system_prompt?.inline).toBe("You are a helpful assistant.");
+    expect(result.config.system_prompt).toBe("You are a helpful assistant.");
   });
 
   it("parses system_prompt with file", () => {
@@ -79,7 +78,7 @@ system_prompt:
 `;
     const result = parseForgeYaml(yaml);
     if (!result.success) throw new Error("Expected success");
-    expect(result.config.system_prompt?.file).toBe("prompts/system.txt");
+    expect((result.config.system_prompt as { file: string }).file).toBe("prompts/system.txt");
   });
 
   it("parses mcp_servers", () => {
@@ -90,17 +89,16 @@ agent:
 model:
   provider: anthropic
   name: claude-sonnet-4-5-20251001
-tools:
-  mcp_servers:
-    - name: search
-      command: npx
-      args: ["-y", "search-server"]
-      env:
-        API_KEY: "\${SEARCH_API_KEY}"
+mcp_servers:
+  - name: search
+    command: npx
+    args: ["-y", "search-server"]
+    env:
+      API_KEY: "\${SEARCH_API_KEY}"
 `;
     const result = parseForgeYaml(yaml);
     if (!result.success) throw new Error("Expected success");
-    const server = result.config.tools?.mcp_servers?.[0];
+    const server = result.config.mcp_servers?.[0];
     expect(server?.name).toBe("search");
     expect(server?.args).toEqual(["-y", "search-server"]);
   });
@@ -121,7 +119,9 @@ memory:
     const result = parseForgeYaml(yaml);
     if (!result.success) throw new Error("Expected success");
     expect(result.config.memory?.type).toBe("vector");
-    expect(result.config.memory?.provider).toBe("chroma");
+    if (result.config.memory?.type === "vector") {
+      expect(result.config.memory.provider).toBe("chroma");
+    }
   });
 
   it("parses environments block", () => {
@@ -186,7 +186,7 @@ model:
     expect(result.success).toBe(false);
   });
 
-  it("rejects system_prompt with neither file nor inline", () => {
+  it("rejects system_prompt with empty file", () => {
     const result = parseForgeYaml(`
 version: "1"
 agent:
@@ -195,7 +195,7 @@ model:
   provider: anthropic
   name: claude-sonnet-4-5-20251001
 system_prompt:
-  file:
+  file: ""
 `);
     expect(result.success).toBe(false);
   });

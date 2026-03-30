@@ -16,13 +16,11 @@ model:
   name: claude-sonnet-4-5-20251001
   temperature: 0.3
   max_tokens: 4096
-system_prompt:
-  inline: "You are a helpful assistant."
-tools:
-  mcp_servers:
-    - name: filesystem
-      command: npx
-      args: ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
+system_prompt: "You are a helpful assistant."
+mcp_servers:
+  - name: filesystem
+    command: npx
+    args: ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"]
 memory:
   type: in-context
 environments:
@@ -31,14 +29,14 @@ environments:
       temperature: 0.1
 hooks:
   pre_deploy:
-    - run: "npm test"
+    - "npm test"
   post_deploy:
-    - run: "echo deployed"
+    - "echo deployed"
 `;
     const result = parseForgeYaml(yaml);
     if (!result.success) throw new Error("Expected success");
     expect(result.config.agent.name).toBe("prod-agent");
-    expect(result.config.hooks?.pre_deploy?.[0].run).toBe("npm test");
+    expect(result.config.hooks?.pre_deploy?.[0]).toBe("npm test");
   });
 
   it("collects multiple errors", () => {

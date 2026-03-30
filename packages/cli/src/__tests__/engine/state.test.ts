@@ -49,12 +49,12 @@ describe("hashConfig", () => {
     expect(hashConfig(cfg1)).toBe(hashConfig(cfg2));
   });
 
-  it("changes when tools are added", () => {
-    const withTools: ForgeConfig = {
+  it("changes when mcp_servers are added", () => {
+    const withServers: ForgeConfig = {
       ...baseConfig,
-      tools: { mcp_servers: [{ name: "search", command: "npx search-server" }] },
+      mcp_servers: [{ name: "search", command: "npx search-server" }],
     };
-    expect(hashConfig(baseConfig)).not.toBe(hashConfig(withTools));
+    expect(hashConfig(baseConfig)).not.toBe(hashConfig(withServers));
   });
 });
 
@@ -145,32 +145,28 @@ describe("createState", () => {
   it("redacts resolved env var secrets", () => {
     const configWithSecret: ForgeConfig = {
       ...baseConfig,
-      tools: {
-        mcp_servers: [{
-          name: "server",
-          command: "cmd",
-          env: { SECRET_KEY: "actual-secret-value" },
-        }],
-      },
+      mcp_servers: [{
+        name: "server",
+        command: "cmd",
+        env: { SECRET_KEY: "actual-secret-value" },
+      }],
     };
     const state = createState(configWithSecret, "prod");
-    const server = state.config.tools?.mcp_servers?.[0];
+    const server = state.config.mcp_servers?.[0];
     expect(server?.env?.SECRET_KEY).toBe("[REDACTED]");
   });
 
   it("preserves template references in env", () => {
     const configWithTemplate: ForgeConfig = {
       ...baseConfig,
-      tools: {
-        mcp_servers: [{
-          name: "server",
-          command: "cmd",
-          env: { KEY: "${MY_SECRET}" },
-        }],
-      },
+      mcp_servers: [{
+        name: "server",
+        command: "cmd",
+        env: { KEY: "${MY_SECRET}" },
+      }],
     };
     const state = createState(configWithTemplate, "prod");
-    const server = state.config.tools?.mcp_servers?.[0];
+    const server = state.config.mcp_servers?.[0];
     expect(server?.env?.KEY).toBe("${MY_SECRET}");
   });
 });

@@ -33,21 +33,19 @@ describe("ForgeConfig type", () => {
         temperature: 0.7,
         max_tokens: 4096,
       },
-      system_prompt: { inline: "You are helpful." },
-      tools: {
-        mcp_servers: [{ name: "search", command: "npx search" }],
-      },
+      system_prompt: "You are helpful.",
+      mcp_servers: [{ name: "search", command: "npx search" }],
       memory: { type: "in-context" },
       environments: {
         prod: { model: { temperature: 0.1 } },
       },
       hooks: {
-        pre_deploy: [{ run: "npm test" }],
-        post_deploy: [{ run: "echo done" }],
+        pre_deploy: ["npm test"],
+        post_deploy: ["echo done"],
       },
     };
     expect(config.model.temperature).toBe(0.7);
-    expect(config.hooks?.pre_deploy?.[0].run).toBe("npm test");
+    expect(config.hooks?.pre_deploy?.[0]).toBe("npm test");
   });
 
   it("supports all ModelProvider values", () => {
@@ -63,11 +61,12 @@ describe("ForgeConfig type", () => {
   });
 
   it("supports all MemoryType values", () => {
-    const types = ["none", "in-context", "vector"] as const;
-    for (const type of types) {
-      const mem: MemoryConfig = { type };
-      expect(mem.type).toBe(type);
-    }
+    const none: MemoryConfig = { type: "none" };
+    expect(none.type).toBe("none");
+    const inContext: MemoryConfig = { type: "in-context" };
+    expect(inContext.type).toBe("in-context");
+    const vector: MemoryConfig = { type: "vector", provider: "chroma" };
+    expect(vector.type).toBe("vector");
   });
 
   it("supports all MemoryProvider values", () => {

@@ -18,8 +18,8 @@ export function redactEnvRecord(env: Record<string, string>): void {
  */
 export function redactConfig(config: ForgeConfig): ForgeConfig {
   const cloned = JSON.parse(JSON.stringify(config)) as ForgeConfig;
-  if (cloned.tools?.mcp_servers) {
-    for (const server of cloned.tools.mcp_servers) {
+  if (cloned.mcp_servers) {
+    for (const server of cloned.mcp_servers) {
       if (server.env) {
         redactEnvRecord(server.env);
       }
