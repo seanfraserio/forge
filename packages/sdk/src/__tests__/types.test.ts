@@ -48,8 +48,8 @@ describe("ForgeConfig type", () => {
     expect(config.hooks?.pre_deploy?.[0]).toBe("npm test");
   });
 
-  it("supports all ModelProvider values", () => {
-    const providers = ["anthropic", "openai", "google", "ollama", "bedrock"] as const;
+  it("supports all ProviderName values", () => {
+    const providers = ["anthropic", "openai", "google", "ollama", "bedrock", "mistral", "cohere"] as const;
     for (const provider of providers) {
       const config: ForgeConfig = {
         version: "1",

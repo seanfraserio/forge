@@ -26,7 +26,7 @@
     - [`ForgeConfig`](#forgeconfig)
     - [`AgentConfig`](#agentconfig)
     - [`ModelConfig`](#modelconfig)
-    - [`ModelProvider`](#modelprovider)
+    - [`ProviderName`](#providername)
     - [`SystemPromptConfig`](#systempromptconfig)
     - [`ToolsConfig`](#toolsconfig)
     - [`McpServerConfig`](#mcpserverconfig)
@@ -296,7 +296,7 @@ agent:
 
 | Field | Type | Required | Constraints | Description |
 |-------|------|----------|-------------|-------------|
-| `provider` | [`ModelProvider`](#modelprovider) | Yes | One of: `anthropic`, `openai`, `google`, `ollama`, `bedrock` | The model provider. |
+| `provider` | [`ProviderName`](#providername) | Yes | One of: `anthropic`, `openai`, `google`, `ollama`, `bedrock`, `mistral`, `cohere` | The model provider. |
 | `name` | `string` | Yes | Min 1 char. | The model identifier (e.g., `claude-sonnet-4-5-20251001`, `gpt-4o`). |
 | `temperature` | `number` | No | `>= 0`, `<= 2` | Sampling temperature. |
 | `max_tokens` | `number` | No | Positive integer. | Maximum tokens in the response. |
@@ -495,7 +495,7 @@ interface AgentConfig {
 
 ```typescript
 interface ModelConfig {
-  provider: ModelProvider;
+  provider: ProviderName;
   name: string;
   temperature?: number;
   max_tokens?: number;
@@ -504,17 +504,17 @@ interface ModelConfig {
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `provider` | `ModelProvider` | Yes | Model provider identifier. |
+| `provider` | `ProviderName` | Yes | Model provider identifier. |
 | `name` | `string` | Yes | Model name (e.g., `claude-sonnet-4-5-20251001`). |
 | `temperature` | `number` | No | Sampling temperature (`0`--`2`). |
 | `max_tokens` | `number` | No | Maximum response tokens (positive integer). |
 
 ---
 
-#### `ModelProvider`
+#### `ProviderName`
 
 ```typescript
-type ModelProvider = "anthropic" | "openai" | "google" | "ollama" | "bedrock";
+type ProviderName = "anthropic" | "openai" | "google" | "ollama" | "bedrock" | "mistral" | "cohere";
 ```
 
 ---

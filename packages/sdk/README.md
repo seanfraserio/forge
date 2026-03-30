@@ -17,7 +17,7 @@ Types that map directly to `forge.yaml` structure:
 - **`ForgeConfig`** — Root config: agent, model, system prompt, tools, memory, environments, hooks
 - **`AgentConfig`** — Agent name and description
 - **`ModelConfig`** — Provider, model name, temperature, max tokens
-- **`ModelProvider`** — `"anthropic" | "openai" | "google" | "ollama" | "bedrock"`
+- **`ProviderName`** — `"anthropic" | "openai" | "google" | "ollama" | "bedrock" | "mistral" | "cohere"`
 - **`SystemPromptConfig`** — Inline string or `{ file: string }` reference
 - **`McpServerConfig`** — MCP server declarations
 - **`MemoryConfig`** — Discriminated union: `none`, `in-context`, or `vector` (with required provider)

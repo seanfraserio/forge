@@ -2,7 +2,7 @@ export type {
   ForgeConfig,
   AgentConfig,
   ModelConfig,
-  ModelProvider,
+  ProviderName,
   SystemPromptConfig,
   McpServerConfig,
   MemoryConfig,

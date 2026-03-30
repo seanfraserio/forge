@@ -17,13 +17,13 @@ export interface AgentConfig {
 }
 
 export interface ModelConfig {
-  provider: ModelProvider;
+  provider: ProviderName;
   name: string;
   temperature?: number;
   max_tokens?: number;
 }
 
-export type ModelProvider = "anthropic" | "openai" | "google" | "ollama" | "bedrock";
+export type ProviderName = "anthropic" | "openai" | "google" | "ollama" | "bedrock" | "mistral" | "cohere";
 
 export type SystemPromptConfig = string | { file: string };
 
