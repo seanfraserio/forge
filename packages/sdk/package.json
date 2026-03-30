@@ -1,6 +1,6 @@
 {
   "name": "@openforge-ai/sdk",
-  "version": "0.2.6",
+  "version": "0.2.7",
   "description": "TypeScript SDK and types for Forge agent infrastructure",
   "type": "module",
   "license": "MIT",
