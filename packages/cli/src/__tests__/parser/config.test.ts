@@ -229,6 +229,42 @@ model:
   });
 });
 
+describe("parseForgeYaml — hook shell metacharacter validation", () => {
+  const makeHookYaml = (hookType: string, command: string) => `
+version: "1"
+agent:
+  name: my-agent
+model:
+  provider: anthropic
+  name: claude-sonnet-4-5-20251001
+hooks:
+  ${hookType}:
+    - "${command}"
+`;
+
+  it("accepts safe pre_deploy hook commands", () => {
+    const result = parseForgeYaml(makeHookYaml("pre_deploy", "npm run lint"));
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts safe post_deploy hook commands", () => {
+    const result = parseForgeYaml(makeHookYaml("post_deploy", "npm test"));
+    expect(result.success).toBe(true);
+  });
+
+  for (const char of [";", "|", "&", "$", "(", ")", ">", "`", "<"]) {
+    it(`rejects pre_deploy hook containing '${char}'`, () => {
+      const result = parseForgeYaml(makeHookYaml("pre_deploy", `echo hello ${char} echo injected`));
+      expect(result.success).toBe(false);
+    });
+
+    it(`rejects post_deploy hook containing '${char}'`, () => {
+      const result = parseForgeYaml(makeHookYaml("post_deploy", `echo hello ${char} echo injected`));
+      expect(result.success).toBe(false);
+    });
+  }
+});
+
 describe("resolveEnvironment", () => {
   const parsed = parseForgeYaml(`
 version: "1"

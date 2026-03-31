@@ -54,9 +54,14 @@ export const memoryConfigSchema = z.object({
   { message: "vector memory type requires a provider" }
 );
 
+const hookCommandSchema = z.string().min(1).refine(
+  (cmd) => !SHELL_METACHAR_PATTERN.test(cmd),
+  { message: "Hook command must not contain shell metacharacters (;|&$()>`<)" }
+);
+
 export const hooksConfigSchema = z.object({
-  pre_deploy: z.array(z.string().min(1)).optional(),
-  post_deploy: z.array(z.string().min(1)).optional(),
+  pre_deploy: z.array(hookCommandSchema).optional(),
+  post_deploy: z.array(hookCommandSchema).optional(),
 });
 
 export const environmentOverrideSchema = z.object({

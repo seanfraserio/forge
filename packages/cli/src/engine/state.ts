@@ -77,6 +77,12 @@ export async function readState(stateDir: string): Promise<AgentState | null> {
       console.warn("Warning: State file has invalid structure. Treating as no prior state.");
       return null;
     }
+    // Verify configHash integrity: re-hash the embedded config and compare
+    const recomputedHash = hashConfig(validated.data.config as ForgeConfig);
+    if (recomputedHash !== validated.data.configHash) {
+      console.warn("Warning: State file integrity check failed (configHash mismatch). Treating as no prior state.");
+      return null;
+    }
     // Cast through unknown: Zod validates the envelope structure,
     // but the nested config object is opaque at the state-validation level
     return validated.data as unknown as AgentState;

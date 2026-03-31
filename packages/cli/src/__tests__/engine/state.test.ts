@@ -83,6 +83,39 @@ describe("readState", () => {
     const result = await readState(tmpDir);
     expect(result).toBeNull();
   });
+
+  it("returns null when configHash has been tampered with", async () => {
+    const { writeFile, mkdir } = await import("node:fs/promises");
+    const tmpDir = `/tmp/forge-tampered-hash-${Date.now()}`;
+    tmpDirs.push(tmpDir);
+    await mkdir(tmpDir, { recursive: true });
+
+    // Write valid state, then tamper with the configHash
+    const state = createState(baseConfig, "production");
+    const tampered = { ...state, configHash: "deadbeef".repeat(8) };
+    await writeFile(`${tmpDir}/state.json`, JSON.stringify(tampered, null, 2));
+
+    const result = await readState(tmpDir);
+    expect(result).toBeNull();
+  });
+
+  it("returns null when config has been tampered with", async () => {
+    const { writeFile, mkdir } = await import("node:fs/promises");
+    const tmpDir = `/tmp/forge-tampered-config-${Date.now()}`;
+    tmpDirs.push(tmpDir);
+    await mkdir(tmpDir, { recursive: true });
+
+    // Write valid state, then tamper with the embedded config
+    const state = createState(baseConfig, "production");
+    const tamperedState = {
+      ...state,
+      config: { ...state.config, agent: { name: "evil-agent" } },
+    };
+    await writeFile(`${tmpDir}/state.json`, JSON.stringify(tamperedState, null, 2));
+
+    const result = await readState(tmpDir);
+    expect(result).toBeNull();
+  });
 });
 
 describe("writeState and readState roundtrip", () => {
