@@ -45,14 +45,15 @@ export const mcpServersSchema = z.array(mcpServerSchema).optional();
 export const memoryTypeSchema = z.enum(["none", "in-context", "vector"]);
 export const memoryProviderSchema = z.enum(["chroma", "pinecone", "weaviate"]);
 
-export const memoryConfigSchema = z.object({
-  type: memoryTypeSchema,
-  provider: memoryProviderSchema.optional(),
-  collection: z.string().optional(),
-}).refine(
-  (data) => data.type !== "vector" || data.provider,
-  { message: "vector memory type requires a provider" }
-);
+export const memoryConfigSchema = z.discriminatedUnion("type", [
+  z.object({ type: z.literal("none") }),
+  z.object({ type: z.literal("in-context") }),
+  z.object({
+    type: z.literal("vector"),
+    provider: memoryProviderSchema,
+    collection: z.string().optional(),
+  }),
+]);
 
 const hookCommandSchema = z.string().min(1).refine(
   (cmd) => !SHELL_METACHAR_PATTERN.test(cmd),
@@ -85,4 +86,7 @@ export const forgeConfigSchema = z.object({
   environments: z.record(environmentOverrideSchema).optional(),
   hooks: hooksConfigSchema.optional(),
 });
+
+/** Runtime-validated forge.yaml / persisted config. Structurally a ForgeConfig. */
+export type ParsedForgeConfig = z.infer<typeof forgeConfigSchema>;
 

@@ -57,6 +57,8 @@ export interface HooksConfig {
 
 export interface AgentState {
   configHash: string;
+  /** SHA-256 of the embedded (possibly redacted) config document. */
+  persistedConfigHash?: string;
   lastDeployed: string; // ISO timestamp
   environment: string;
   agentName: string;

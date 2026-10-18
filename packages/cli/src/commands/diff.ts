@@ -8,12 +8,14 @@ import { redactValue } from "../utils/redact.js";
 export interface DiffCommandOptions {
   config: string;
   env: string;
+  /** Override the state directory. Defaults to ".forge" in the process cwd. */
+  stateDir?: string;
 }
 
 export async function diffCommand(opts: DiffCommandOptions): Promise<void> {
   const baseConfig = await loadConfig(opts.config);
   const config = resolveEnvironment(baseConfig, opts.env);
-  const currentState = await readState(".forge");
+  const currentState = await readState(opts.stateDir ?? ".forge");
   // Plan against unredacted config for correct hash comparison
   const planResult = plan(config, currentState);
 

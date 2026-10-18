@@ -66,7 +66,7 @@ forgeai deploy --env dev  # Deploy the agent
 | Feature | OSS (MIT) | Enterprise (BUSL-1.1) |
 |---|---|---|
 | Config parsing + validation | ✓ | ✓ |
-| Deploy / diff / rollback | ✓ | ✓ |
+| Deploy / diff | ✓ | ✓ |
 | Multi-environment overrides | ✓ | ✓ |
 | MCP server management | ✓ | ✓ |
 | Audit trail | — | ✓ |

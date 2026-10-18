@@ -6,7 +6,7 @@ Thank you for your interest in contributing to Forge! This guide will help you g
 
 ### Prerequisites
 
-- Node.js 20+
+- Development: Node.js 20.19+ (20.x), 22.13+ (22.x), or 24+. The private workspace engine describes build/test/lint requirements; published SDK, adapters and CLI retain Node.js >=20.0.0 runtime support. pnpm normally warns for an unsupported engine unless engine-strict is enabled.
 - pnpm 9+
 - Git
 

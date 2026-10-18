@@ -63,9 +63,9 @@ Environment overrides are applied before hashing. When you run `forgeai deploy -
 
 Because state is a single file, deploying to different environments from the same directory overwrites the previous state. In CI this is not a problem because each job runs in an isolated workspace. For local development, be aware that switching between `--env dev` and `--env production` replaces the state each time.
 
-### What rollback actually does
+### Rollback is not implemented
 
-`forgeai rollback` reads the previous config from `.forge/state.json`, re-runs the plan/apply cycle with that config as the desired state, and writes the result back to state. It does not maintain a history of past deployments -- it restores the single previous snapshot. If you need deeper rollback history, use the enterprise `AuditTrail` module, which maintains an append-only log of every deployment in `.forge/audit.jsonl`.
+The CLI does not implement `forgeai rollback`. `createProgram()` registers `validate`, `diff`, and `deploy` only. State stores the last successful deploy snapshot so a later deploy can detect no-ops; it is not a rollback history and is not restored by any command. Do not add a CI step that calls `forgeai rollback`.
 
 Add `.forge/` to `.gitignore` -- state is local to each deployment target.
 

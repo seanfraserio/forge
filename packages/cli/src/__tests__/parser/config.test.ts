@@ -50,6 +50,43 @@ model:
     expect(result.config.model.max_tokens).toBe(2048);
   });
 
+  it("accepts bracket-heavy block-scalar system_prompt without treating brackets as nesting", () => {
+    const brackets = "[".repeat(40) + " ordinary prompt text " + "]".repeat(40);
+    const yaml = `
+version: "1"
+agent:
+  name: valid-prompt
+model:
+  provider: anthropic
+  name: example
+system_prompt: |
+  ${brackets}
+`;
+    const result = parseForgeYaml(yaml);
+    if (!result.success) throw new Error(result.errors.join("\n"));
+    expect(result.config.system_prompt).toContain("ordinary prompt text");
+    expect(result.config.system_prompt).toContain("[".repeat(40));
+  });
+
+  it("accepts bracket-heavy comments and literal braces in ordinary block text", () => {
+    const comment = "# " + "{".repeat(40) + "[".repeat(40) + " comment " + "]".repeat(40) + "}".repeat(40);
+    const yaml = `
+version: "1"
+agent:
+  name: valid-prompt
+model:
+  provider: anthropic
+  name: example
+${comment}
+system_prompt: |
+  Use {curly} and [square] braces freely in prompt text.
+  ${"{".repeat(40)} still just a scalar ${"}".repeat(40)}
+`;
+    const result = parseForgeYaml(yaml);
+    if (!result.success) throw new Error(result.errors.join("\n"));
+    expect(result.config.system_prompt).toContain("still just a scalar");
+  });
+
   it("parses system_prompt with inline string", () => {
     const yaml = `
 version: "1"
@@ -143,11 +180,66 @@ environments:
   });
 });
 
+describe("parseForgeYaml — collection depth boundary", () => {
+  function atDepth(depth: number, style: string): string {
+    // The document's root map is collection level 1.
+    let value = "leaf";
+    for (let level = 1; level < depth; level++) {
+      if (style === "flow map") value = `{k: ${value}}`;
+      else if (style === "flow sequence") value = `[${value}]`;
+      else if (style === "block map") value = `k:\n${value.split("\n").map((line) => `  ${line}`).join("\n")}`;
+      else value = `-\n${value.split("\n").map((line) => `  ${line}`).join("\n")}`;
+    }
+    return style.startsWith("flow")
+      ? `${minimalValidYaml}\nextra: ${value}\n`
+      : `${minimalValidYaml}\nextra:\n${value.split("\n").map((line) => `  ${line}`).join("\n")}\n`;
+  }
+
+  for (const style of ["flow map", "flow sequence", "block map", "block sequence"]) {
+    it(`accepts exactly 32 collection levels (${style})`, () => {
+      const result = parseForgeYaml(atDepth(32, style));
+      expect(result.success).toBe(true);
+    });
+
+    it(`rejects 33 collection levels (${style})`, () => {
+      const result = parseForgeYaml(atDepth(33, style));
+      expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected depth rejection");
+      expect(result.errors.join("\n")).toMatch(/collection nesting is too deep/);
+    });
+  }
+});
+
 describe("parseForgeYaml — error handling", () => {
   it("rejects invalid YAML syntax", () => {
     const result = parseForgeYaml(":\n  bad: [yaml: here");
     if (result.success) throw new Error("Expected failure");
     expect(result.errors[0]).toMatch(/YAML parse error/i);
+  });
+
+  it("rejects a deeply nested flow collection without throwing", () => {
+    // Real nested flow maps, not indentation or scalar brackets.
+    let nested = "0";
+    for (let i = 0; i < 100; i++) {
+      nested = `{k: ${nested}}`;
+    }
+    const yaml = `
+version: "1"
+agent:
+  name: my-agent
+model:
+  provider: anthropic
+  name: example
+extra: ${nested}
+`;
+    let result: ReturnType<typeof parseForgeYaml>;
+    expect(() => {
+      result = parseForgeYaml(yaml);
+    }).not.toThrow();
+    expect(result!.success).toBe(false);
+    if (result!.success) throw new Error("Expected failure");
+    expect(result!.errors.length).toBeGreaterThan(0);
+    expect(result!.errors.join("\n")).toMatch(/YAML parse error/i);
   });
 
   it("rejects missing version", () => {

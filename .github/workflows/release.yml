@@ -25,26 +25,25 @@ jobs:
           registry-url: "https://registry.npmjs.org"
 
       - run: pnpm install --frozen-lockfile
-      - run: pnpm audit --audit-level=high
+      - run: node scripts/check-toolchain.mjs
+      - run: node scripts/check-release-workflow.mjs
+      - run: pnpm audit --audit-level=moderate
+      - run: pnpm audit --prod --audit-level=moderate
       - run: pnpm build
       - run: pnpm test
+      - run: node scripts/packaging-consumer.mjs
 
-      - name: Publish SDK
-        run: cd packages/sdk && npm publish --access public || true
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish Adapters
-        run: cd packages/adapters && npm publish --access public || true
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish CLI
-        run: cd packages/cli && npm publish --access public || true
+      # Workspace-aware publish. pnpm rewrites workspace:* to the sibling
+      # versions and publishes in dependency order. Failures propagate.
+      # --no-git-checks is required because the checkout is a tag, not a branch.
+      # The root package is private and is excluded by the filter.
+      - name: Publish packages
+        run: pnpm -r publish --access public --no-git-checks --filter "@openforge-ai/sdk" --filter "@openforge-ai/adapters" --filter "@openforge-ai/cli"
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          body_path: RELEASE_NOTES.md
           generate_release_notes: true

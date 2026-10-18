@@ -94,6 +94,23 @@ describe("AgentState type", () => {
     };
     expect(state.configHash).toBe("abc123");
     expect(state.environment).toBe("production");
+    expect(state.persistedConfigHash).toBeUndefined();
+  });
+
+  it("allows an optional persistedConfigHash for redacted state", () => {
+    const state: AgentState = {
+      configHash: "live",
+      persistedConfigHash: "redacted",
+      lastDeployed: "2025-01-01T00:00:00Z",
+      environment: "dev",
+      agentName: "bot",
+      config: {
+        version: "1",
+        agent: { name: "bot" },
+        model: { provider: "anthropic", name: "model" },
+      },
+    };
+    expect(state.persistedConfigHash).toBe("redacted");
   });
 
   it("allows optional agentVersion", () => {
