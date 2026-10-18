@@ -20,8 +20,9 @@ function collectionDepthExceeded(doc: Document): boolean {
   visit(doc, (_key, node, path) => {
     if (exceeded) return visit.BREAK;
     if (!isCollection(node) || !Array.isArray(path)) return;
-    // visit() path includes the node itself. Pair steps are not containers.
-    const collectionDepth = path.filter(isCollection).length;
+    // visit() path contains ancestors only; include this collection itself.
+    // Pair steps are not containers.
+    const collectionDepth = path.filter(isCollection).length + 1;
     if (collectionDepth > MAX_YAML_COLLECTION_DEPTH) exceeded = true;
   });
   return exceeded;

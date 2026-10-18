@@ -180,6 +180,36 @@ environments:
   });
 });
 
+describe("parseForgeYaml — collection depth boundary", () => {
+  function atDepth(depth: number, style: string): string {
+    // The document's root map is collection level 1.
+    let value = "leaf";
+    for (let level = 1; level < depth; level++) {
+      if (style === "flow map") value = `{k: ${value}}`;
+      else if (style === "flow sequence") value = `[${value}]`;
+      else if (style === "block map") value = `k:\n${value.split("\n").map((line) => `  ${line}`).join("\n")}`;
+      else value = `-\n${value.split("\n").map((line) => `  ${line}`).join("\n")}`;
+    }
+    return style.startsWith("flow")
+      ? `${minimalValidYaml}\nextra: ${value}\n`
+      : `${minimalValidYaml}\nextra:\n${value.split("\n").map((line) => `  ${line}`).join("\n")}\n`;
+  }
+
+  for (const style of ["flow map", "flow sequence", "block map", "block sequence"]) {
+    it(`accepts exactly 32 collection levels (${style})`, () => {
+      const result = parseForgeYaml(atDepth(32, style));
+      expect(result.success).toBe(true);
+    });
+
+    it(`rejects 33 collection levels (${style})`, () => {
+      const result = parseForgeYaml(atDepth(33, style));
+      expect(result.success).toBe(false);
+      if (result.success) throw new Error("Expected depth rejection");
+      expect(result.errors.join("\n")).toMatch(/collection nesting is too deep/);
+    });
+  }
+});
+
 describe("parseForgeYaml — error handling", () => {
   it("rejects invalid YAML syntax", () => {
     const result = parseForgeYaml(":\n  bad: [yaml: here");
