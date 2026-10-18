@@ -1,6 +1,6 @@
 {
   "name": "@openforge-ai/cli",
-  "version": "0.2.7",
+  "version": "0.3.0",
   "description": "Agent infrastructure as code \u2014 the Terraform for AI agents",
   "type": "module",
   "license": "MIT",
@@ -13,7 +13,8 @@
     "access": "public"
   },
   "files": [
-    "dist"
+    "dist",
+    "package.json"
   ],
   "keywords": [
     "forge",
@@ -27,19 +28,20 @@
   "bin": {
     "forgeai": "./dist/index.js"
   },
-  "main": "./dist/index.cjs",
+  "main": "./dist/index.js",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
+      "default": "./dist/index.js"
     }
   },
   "scripts": {
     "build": "tsup",
     "test": "vitest run",
-    "dev": "tsup src/index.ts --format esm,cjs --dts --watch",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -47,13 +49,16 @@
     "@openforge-ai/sdk": "workspace:*",
     "chalk": "^5.3.0",
     "commander": "^12.0.0",
-    "yaml": "^2.4.0",
+    "yaml": "^2.8.3",
     "zod": "^3.22.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
-    "tsup": "^8.0.0",
+    "tsup": "8.5.1",
     "typescript": "^5.4.0",
-    "vitest": "^1.4.0"
+    "vitest": "4.1.12"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

@@ -18,12 +18,18 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck
+      - run: node scripts/check-toolchain.mjs
+      - run: node scripts/check-release-workflow.mjs
+      - run: pnpm audit --prod --audit-level=moderate
+      - run: pnpm audit --audit-level=moderate
       - run: pnpm build
+      - run: pnpm typecheck
       - name: Lint
         run: pnpm lint
       - name: Test with coverage
         run: pnpm test -- --coverage
+      - name: Packaging consumer smoke
+        run: node scripts/packaging-consumer.mjs
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:

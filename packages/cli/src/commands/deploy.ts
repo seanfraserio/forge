@@ -30,6 +30,8 @@ export interface DeployCommandOptions {
   autoApprove: boolean;
   dryRun: boolean;
   allowHooks: boolean;
+  /** Override the state directory. Defaults to ".forge" in the process cwd. */
+  stateDir?: string;
 }
 
 async function confirm(message: string): Promise<boolean> {
@@ -72,7 +74,8 @@ export async function deployCommand(opts: DeployCommandOptions): Promise<void> {
   );
 
   // 3. Load current state
-  const currentState = await readState(".forge");
+  const stateDir = opts.stateDir ?? ".forge";
+  const currentState = await readState(stateDir);
 
   // 4. Generate plan
   const planResult = plan(config, currentState);
@@ -123,6 +126,7 @@ export async function deployCommand(opts: DeployCommandOptions): Promise<void> {
     dryRun: false,
     environment: opts.env,
     autoApprove: opts.autoApprove,
+    stateDir,
   };
 
   try {

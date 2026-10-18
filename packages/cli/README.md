@@ -83,14 +83,6 @@ Resolves environment overrides, generates a plan, and applies changes. Writes st
 | `--dry-run` | `false` | Show plan without applying |
 | `--allow-hooks` | `false` | Allow pre_deploy/post_deploy hook execution |
 
-### `forgeai rollback`
-
-Displays current deployment state. Rollback to a specific state hash is planned but not yet implemented.
-
-| Flag | Default | Description |
-|---|---|---|
-| `--target <hash>` | — | Target state hash to roll back to |
-
 ## Configuration
 
 See the [root README](../../README.md) for full `forge.yaml` schema documentation, environment overrides, MCP server configuration, and hook definitions.

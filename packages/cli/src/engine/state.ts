@@ -3,6 +3,7 @@ import { createHash } from "node:crypto";
 import { join } from "node:path";
 import { z } from "zod";
 import type { AgentState, ForgeConfig } from "@openforge-ai/sdk";
+import { forgeConfigSchema, type ParsedForgeConfig } from "../parser/schema.js";
 import { redactConfig } from "../utils/redact.js";
 
 /**
@@ -11,6 +12,7 @@ import { redactConfig } from "../utils/redact.js";
  */
 const agentStateSchema = z.object({
   configHash: z.string(),
+  persistedConfigHash: z.string().optional(),
   lastDeployed: z.string(),
   environment: z.string(),
   agentName: z.string(),
@@ -27,6 +29,10 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
  * Validate stateDir against path traversal attacks.
  * Rejects paths containing '..' segments to prevent writing outside the intended directory.
  */
+function toForgeConfig(parsed: ParsedForgeConfig): ForgeConfig {
+  return parsed;
+}
+
 function validateStateDir(stateDir: string): void {
   if (stateDir.includes("..")) {
     throw new Error(`stateDir must not contain path traversal ('..').  Got: ${stateDir}`);
@@ -48,10 +54,19 @@ function sortDeep(obj: unknown): unknown {
 }
 
 /**
- * Compute a deterministic SHA-256 hash of a normalized config.
- * Uses deep recursive key sorting for stable serialization.
+ * JSON-compatible value that can be hashed for state integrity.
+ * Persisted state stores a redacted config, which is not always a live ForgeConfig
+ * (resolved secrets are replaced before the hash is checked on read).
  */
-export function hashConfig(config: ForgeConfig): string {
+export type HashableConfig = ForgeConfig | Record<string, unknown>;
+
+/**
+ * Compute a deterministic SHA-256 hash of a normalized JSON value.
+ * Uses deep recursive key sorting for stable serialization.
+ * Hashing is intentionally generic: integrity is checked against the embedded
+ * JSON before that JSON is accepted as a ForgeConfig.
+ */
+export function hashConfig(config: HashableConfig): string {
   const normalized = JSON.stringify(sortDeep(config));
   return createHash("sha256").update(normalized).digest("hex");
 }
@@ -77,15 +92,29 @@ export async function readState(stateDir: string): Promise<AgentState | null> {
       console.warn("Warning: State file has invalid structure. Treating as no prior state.");
       return null;
     }
-    // Verify configHash integrity: re-hash the embedded config and compare
-    const recomputedHash = hashConfig(validated.data.config as ForgeConfig);
-    if (recomputedHash !== validated.data.configHash) {
+    // Integrity is over the embedded JSON, which may be redacted.
+    // Newer files store persistedConfigHash of that document and configHash of the
+    // pre-redaction config. Older files only store configHash; those still load when
+    // the embedded document itself hashes to configHash (nothing was redacted).
+    const embedded = validated.data.config;
+    const recomputedHash = hashConfig(embedded);
+    const declaredPersisted = validated.data.persistedConfigHash;
+    const persistedOk = declaredPersisted
+      ? declaredPersisted === recomputedHash
+      : validated.data.configHash === recomputedHash;
+    if (!persistedOk) {
       console.warn("Warning: State file integrity check failed (configHash mismatch). Treating as no prior state.");
       return null;
     }
-    // Cast through unknown: Zod validates the envelope structure,
-    // but the nested config object is opaque at the state-validation level
-    return validated.data as unknown as AgentState;
+    const configResult = forgeConfigSchema.safeParse(embedded);
+    if (!configResult.success) {
+      console.warn("Warning: State file config is not a valid ForgeConfig. Treating as no prior state.");
+      return null;
+    }
+    return {
+      ...validated.data,
+      config: toForgeConfig(configResult.data),
+    };
   } catch (err: unknown) {
     if (err instanceof Error && "code" in err && (err as NodeJS.ErrnoException).code === "ENOENT") {
       return null;
@@ -153,11 +182,13 @@ export function createState(
   config: ForgeConfig,
   environment: string
 ): AgentState {
+  const persisted = redactConfig(config);
   return {
     configHash: hashConfig(config),
+    persistedConfigHash: hashConfig(persisted),
     lastDeployed: new Date().toISOString(),
     environment,
     agentName: config.agent.name,
-    config: redactConfig(config),
+    config: persisted,
   };
 }

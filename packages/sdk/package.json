@@ -1,6 +1,6 @@
 {
   "name": "@openforge-ai/sdk",
-  "version": "0.2.7",
+  "version": "0.3.0",
   "description": "TypeScript SDK and types for Forge agent infrastructure",
   "type": "module",
   "license": "MIT",
@@ -27,7 +27,7 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "types": "./src/index.ts",
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     }
@@ -39,8 +39,11 @@
     "typecheck": "tsc --noEmit"
   },
   "devDependencies": {
-    "tsup": "^8.0.0",
+    "tsup": "8.5.1",
     "typescript": "^5.4.0",
-    "vitest": "^1.4.0"
+    "vitest": "4.1.12"
+  },
+  "engines": {
+    "node": ">=20.0.0"
   }
 }

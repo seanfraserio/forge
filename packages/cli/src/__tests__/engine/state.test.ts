@@ -56,9 +56,68 @@ describe("hashConfig", () => {
     };
     expect(hashConfig(baseConfig)).not.toBe(hashConfig(withServers));
   });
+
+  it("hashes nested objects deterministically regardless of key order", () => {
+    const left = {
+      version: "1",
+      agent: { description: "nested", name: "bot" },
+      model: { name: "m", provider: "ollama", extra: { b: 1, a: { z: true, y: [3, 1] } } },
+    };
+    const right = {
+      model: { extra: { a: { y: [3, 1], z: true }, b: 1 }, provider: "ollama", name: "m" },
+      agent: { name: "bot", description: "nested" },
+      version: "1",
+    };
+    expect(hashConfig(left)).toBe(hashConfig(right));
+    expect(hashConfig(left)).toMatch(/^[a-f0-9]{64}$/);
+  });
+
+  it("changes when a nested value changes", () => {
+    const left = { agent: { name: "bot", tags: ["a", "b"] } };
+    const right = { agent: { name: "bot", tags: ["a", "c"] } };
+    expect(hashConfig(left)).not.toBe(hashConfig(right));
+  });
+
+  it("hashes redacted persisted config without requiring live secret values", () => {
+    const redacted = {
+      version: "1",
+      agent: { name: "test-agent" },
+      model: { provider: "anthropic", name: "claude-sonnet-4-5-20251001" },
+      mcp_servers: [{ name: "server", command: "cmd", env: { SECRET_KEY: "[REDACTED]" } }],
+    };
+    expect(hashConfig(redacted)).toMatch(/^[a-f0-9]{64}$/);
+    expect(hashConfig(redacted)).toBe(hashConfig(JSON.parse(JSON.stringify(redacted))));
+  });
 });
 
 describe("readState", () => {
+  it("loads legacy state without persistedConfigHash when its embedded config matches", async () => {
+    const { mkdtemp } = await import("node:fs/promises");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const dir = await mkdtemp(join(tmpdir(), "forge-legacy-state-"));
+    tmpDirs.push(dir);
+    const legacy = createState(baseConfig, "dev");
+    delete legacy.persistedConfigHash;
+    await writeState(dir, legacy);
+    expect(await readState(dir)).toEqual(legacy);
+  });
+
+  it("fails closed for legacy redacted state whose live hash cannot be verified", async () => {
+    const { mkdtemp } = await import("node:fs/promises");
+    const { tmpdir } = await import("node:os");
+    const { join } = await import("node:path");
+    const dir = await mkdtemp(join(tmpdir(), "forge-legacy-redacted-"));
+    tmpDirs.push(dir);
+    const legacy = createState({
+      ...baseConfig,
+      mcp_servers: [{ name: "server", command: "cmd", env: { TOKEN: "resolved-value" } }],
+    }, "dev");
+    delete legacy.persistedConfigHash;
+    await writeState(dir, legacy);
+    expect(await readState(dir)).toBeNull();
+  });
+
   it("returns null when directory does not exist", async () => {
     const result = await readState("/tmp/no-state-dir-xyz-99999");
     expect(result).toBeNull();
@@ -92,11 +151,63 @@ describe("readState", () => {
 
     // Write valid state, then tamper with the configHash
     const state = createState(baseConfig, "production");
-    const tampered = { ...state, configHash: "deadbeef".repeat(8) };
+    const tampered = {
+      ...state,
+      configHash: "deadbeef".repeat(8),
+      persistedConfigHash: "deadbeef".repeat(8),
+    };
     await writeFile(`${tmpDir}/state.json`, JSON.stringify(tampered, null, 2));
 
     const result = await readState(tmpDir);
     expect(result).toBeNull();
+  });
+
+  it("returns null for a hash-matching envelope whose embedded config is not a ForgeConfig", async () => {
+    const { writeFile, mkdir } = await import("node:fs/promises");
+    const tmpDir = `/tmp/forge-malformed-config-${Date.now()}`;
+    tmpDirs.push(tmpDir);
+    await mkdir(tmpDir, { recursive: true });
+
+    const malformed = { not: "a-forge-config", nested: { z: 1, a: [true, null] } };
+    const envelope = {
+      configHash: hashConfig(malformed),
+      lastDeployed: new Date().toISOString(),
+      environment: "production",
+      agentName: "test-agent",
+      config: malformed,
+    };
+    await writeFile(`${tmpDir}/state.json`, JSON.stringify(envelope, null, 2));
+
+    const result = await readState(tmpDir);
+    expect(result).toBeNull();
+  });
+
+  it("loads a valid redacted state and preserves the redacted config hash", async () => {
+    const { writeFile, mkdir } = await import("node:fs/promises");
+    const tmpDir = `/tmp/forge-redacted-state-${Date.now()}`;
+    tmpDirs.push(tmpDir);
+    await mkdir(tmpDir, { recursive: true });
+
+    const configWithSecret: ForgeConfig = {
+      ...baseConfig,
+      mcp_servers: [{
+        name: "server",
+        command: "cmd",
+        env: { SECRET_KEY: "actual-secret-value", KEY: "${MY_SECRET}" },
+      }],
+    };
+    const state = createState(configWithSecret, "production");
+    await writeFile(`${tmpDir}/state.json`, JSON.stringify(state, null, 2));
+
+    const loaded = await readState(tmpDir);
+    expect(loaded).not.toBeNull();
+    expect(loaded!.config.mcp_servers?.[0]?.env?.SECRET_KEY).toBe("[REDACTED]");
+    expect(loaded!.config.mcp_servers?.[0]?.env?.KEY).toBe("${MY_SECRET}");
+    expect(loaded!.configHash).toBe(hashConfig(configWithSecret));
+    expect(loaded!.persistedConfigHash).toBe(hashConfig(loaded!.config));
+    expect(loaded!.config.version).toBe("1");
+    expect(loaded!.config.agent.name).toBe("test-agent");
+    expect(loaded!.config.model.provider).toBe("anthropic");
   });
 
   it("returns null when config has been tampered with", async () => {

@@ -50,6 +50,43 @@ model:
     expect(result.config.model.max_tokens).toBe(2048);
   });
 
+  it("accepts bracket-heavy block-scalar system_prompt without treating brackets as nesting", () => {
+    const brackets = "[".repeat(40) + " ordinary prompt text " + "]".repeat(40);
+    const yaml = `
+version: "1"
+agent:
+  name: valid-prompt
+model:
+  provider: anthropic
+  name: example
+system_prompt: |
+  ${brackets}
+`;
+    const result = parseForgeYaml(yaml);
+    if (!result.success) throw new Error(result.errors.join("\n"));
+    expect(result.config.system_prompt).toContain("ordinary prompt text");
+    expect(result.config.system_prompt).toContain("[".repeat(40));
+  });
+
+  it("accepts bracket-heavy comments and literal braces in ordinary block text", () => {
+    const comment = "# " + "{".repeat(40) + "[".repeat(40) + " comment " + "]".repeat(40) + "}".repeat(40);
+    const yaml = `
+version: "1"
+agent:
+  name: valid-prompt
+model:
+  provider: anthropic
+  name: example
+${comment}
+system_prompt: |
+  Use {curly} and [square] braces freely in prompt text.
+  ${"{".repeat(40)} still just a scalar ${"}".repeat(40)}
+`;
+    const result = parseForgeYaml(yaml);
+    if (!result.success) throw new Error(result.errors.join("\n"));
+    expect(result.config.system_prompt).toContain("still just a scalar");
+  });
+
   it("parses system_prompt with inline string", () => {
     const yaml = `
 version: "1"
@@ -148,6 +185,31 @@ describe("parseForgeYaml — error handling", () => {
     const result = parseForgeYaml(":\n  bad: [yaml: here");
     if (result.success) throw new Error("Expected failure");
     expect(result.errors[0]).toMatch(/YAML parse error/i);
+  });
+
+  it("rejects a deeply nested flow collection without throwing", () => {
+    // Real nested flow maps, not indentation or scalar brackets.
+    let nested = "0";
+    for (let i = 0; i < 100; i++) {
+      nested = `{k: ${nested}}`;
+    }
+    const yaml = `
+version: "1"
+agent:
+  name: my-agent
+model:
+  provider: anthropic
+  name: example
+extra: ${nested}
+`;
+    let result: ReturnType<typeof parseForgeYaml>;
+    expect(() => {
+      result = parseForgeYaml(yaml);
+    }).not.toThrow();
+    expect(result!.success).toBe(false);
+    if (result!.success) throw new Error("Expected failure");
+    expect(result!.errors.length).toBeGreaterThan(0);
+    expect(result!.errors.join("\n")).toMatch(/YAML parse error/i);
   });
 
   it("rejects missing version", () => {

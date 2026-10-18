@@ -41,10 +41,11 @@ jobs:
 
       - name: Get tarball SHA256
         id: sha
+        shell: bash
         run: |
           VERSION="${{ steps.version.outputs.version }}"
           URL="https://registry.npmjs.org/@openforge-ai/cli/-/cli-${VERSION}.tgz"
-          SHA256=$(curl -sL "$URL" | shasum -a 256 | awk '{print $1}')
+          SHA256=$(curl -fsSL "$URL" | shasum -a 256 | awk '{print $1}')
           echo "sha256=${SHA256}" >> "$GITHUB_OUTPUT"
           echo "url=${URL}" >> "$GITHUB_OUTPUT"
           echo "SHA256: ${SHA256}"
@@ -71,7 +72,7 @@ jobs:
             end
 
             test do
-              assert_match version.to_s, shell_output("#{bin}/forge --version")
+              assert_match version.to_s, shell_output("#{bin}/forgeai --version")
             end
           end
           ENDOFFORMULA

@@ -11,7 +11,6 @@
     - [`forgeai validate`](#forgeai-validate)
     - [`forgeai diff`](#forgeai-diff)
     - [`forgeai deploy`](#forgeai-deploy)
-    - [`forgeai rollback`](#forgeai-rollback)
   - [Configuration: `forge.yaml`](#configuration-forgeyaml)
     - [Top-Level Fields](#top-level-fields)
     - [`agent`](#agent)
@@ -220,45 +219,7 @@ forgeai deploy --auto-approve --allow-hooks
 
 ---
 
-#### `forgeai rollback`
-
-Roll back to a previous deployment state.
-
-> **Not yet implemented.** Currently displays current state and reports that state history tracking is not available.
-
-```bash
-forgeai rollback [options]
-```
-
-**Options**
-
-| Flag | Type | Default | Description |
-|------|------|---------|-------------|
-| `--target <hash>` | `string` | `undefined` | Target state hash to roll back to |
-
-**Behavior**
-
-- Reads current state from `.forge/state.json`
-- Displays current agent name, environment, deploy timestamp, and config hash
-- If `--target` is provided: prints "Rollback to {hash} is not yet implemented"
-- If `--target` is omitted: prints usage hint
-
-**Exit Codes**
-
-| Code | Meaning |
-|------|---------|
-| `0` | State displayed successfully |
-| `1` | No state file found |
-
-**Example**
-
-```bash
-# Show current state
-forgeai rollback
-
-# Attempt rollback (not yet implemented)
-forgeai rollback --target a1b2c3d4e5f6
-```
+There is no `forgeai rollback` command. `createProgram()` registers `validate`, `diff`, and `deploy` only. `.forge/state.json` stores the last successful deploy so repeated deploys can no-op; it is not restored by any command.
 
 ---
 
@@ -1737,7 +1698,7 @@ All state files are stored in the `.forge/` directory (configurable via `stateDi
 
 ### `.forge/state.json`
 
-Stores the current deployed agent state. Written after every successful `forgeai deploy`. Read by `forgeai deploy`, `forgeai diff`, and `forgeai rollback`.
+Stores the current deployed agent state. Written after every successful `forgeai deploy`. Read by `forgeai deploy` and `forgeai diff`. There is no rollback command.
 
 **Schema:**
 
@@ -1775,7 +1736,7 @@ Stores the current deployed agent state. Written after every successful `forgeai
 
 **When written:** After every successful `forgeai deploy` (not on dry-run).
 
-**When read:** At the start of `forgeai deploy`, `forgeai diff`, and `forgeai rollback` to determine current state.
+**When read:** At the start of `forgeai deploy` and `forgeai diff` to determine current state. Not used for rollback; that command does not exist.
 
 ---
 
