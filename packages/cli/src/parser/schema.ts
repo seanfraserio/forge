@@ -37,7 +37,7 @@ export const mcpServerSchema = z.object({
     { message: "MCP server command must not contain shell metacharacters (;|&$()>`<)" }
   ),
   args: z.array(z.string()).optional(),
-  env: z.record(z.string()).optional(),
+  env: z.record(z.string(), z.string()).optional(),
 });
 
 export const mcpServersSchema = z.array(mcpServerSchema).optional();
@@ -82,7 +82,7 @@ export const forgeConfigSchema = z.object({
   system_prompt: systemPromptSchema.optional(),
   mcp_servers: mcpServersSchema,
   memory: memoryConfigSchema.optional(),
-  environments: z.record(environmentOverrideSchema).optional(),
+  environments: z.record(z.string(), environmentOverrideSchema).optional(),
   hooks: hooksConfigSchema.optional(),
 });
 
