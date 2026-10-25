@@ -15,7 +15,7 @@ const agentStateSchema = z.object({
   environment: z.string(),
   agentName: z.string(),
   agentVersion: z.string().optional(),
-  config: z.record(z.unknown()),
+  config: z.record(z.string(), z.unknown()),
   endpoint: z.string().optional(),
   agentId: z.string().optional(),
 }).strict();
@@ -78,7 +78,7 @@ export async function readState(stateDir: string): Promise<AgentState | null> {
       return null;
     }
     // Verify configHash integrity: re-hash the embedded config and compare
-    const recomputedHash = hashConfig(validated.data.config as ForgeConfig);
+    const recomputedHash = hashConfig(validated.data.config as unknown as ForgeConfig);
     if (recomputedHash !== validated.data.configHash) {
       console.warn("Warning: State file integrity check failed (configHash mismatch). Treating as no prior state.");
       return null;
